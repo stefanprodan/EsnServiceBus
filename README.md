@@ -1,6 +1,6 @@
 # EsnServiceBus
 
-Service Bus and Service Registy implementation based on RabbitMQ
+Service Bus and Service Registry implementation based on RabbitMQ
 
 ### Prerequisites
 
