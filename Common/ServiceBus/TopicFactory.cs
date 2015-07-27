@@ -20,21 +20,31 @@ namespace Common.ServiceBus
         private IConnection consumerConnection;
         private IConnection producerConnection;
 
-        private volatile bool stopPending;
+        private readonly IMessageSerializer serializer;
+        private readonly ILog logger;
 
+        private volatile bool stopPending;
+        private readonly string version;
+        
         public string ExchangeName { get; set; }
         public bool DurableExchange { get; set; }
         public bool DurableQueue { get; set; }
 
         public bool PersistentMessages { get; set; }
 
-        public TopicFactory(ConnectionFactory connectionFactory, string exchangeName = "esn.topic", bool durableExchange = true, bool durableQueue = true, bool persistentMessages = true)
+        public Action OnConsumerExit { get; set; }
+        public Action<string> OnUpdateNeeded { get; set; }
+        
+        public TopicFactory(ConnectionFactory connectionFactory, IMessageSerializer serializer, ILog logger, string version, string exchangeName = "esn.topic", bool durableExchange = true, bool durableQueue = true, bool persistentMessages = true)
         {
             amqpConnectionFactory = connectionFactory;
             ExchangeName = exchangeName;
             DurableExchange = durableExchange;
             DurableQueue = durableQueue;
             PersistentMessages = persistentMessages;
+            this.version = version;
+            this.serializer = serializer;
+            this.logger = logger;
         }
 
         private string GetTopicQueue(string topic)
@@ -96,16 +106,40 @@ namespace Common.ServiceBus
                     {
                         try
                         {
+                            logger.Info($"The topic {topic} consumer has started");
+
                             var reject = false;
                             var delivery = consumer.Queue.Dequeue();
-                            var json = Encoding.UTF8.GetString(delivery.Body);
-
+                            
                             try
                             {
-                                Console.WriteLine(" [{0}] Message received from '{1}' with topics '{2}' len {3}",
-                                   topic.ToUpperInvariant(), queueName, delivery.RoutingKey, json.Length);
+                                logger.Debug($" Topic {topic} consumer  message received from {queueName} with topics {delivery.RoutingKey}");
 
-                                var message = JsonConvert.DeserializeObject<T>(json);
+                                //check version
+                                if (delivery.BasicProperties.Headers != null && delivery.BasicProperties.Headers.Keys.Contains("x-version"))
+                                {
+                                    var versionHeader = Encoding.UTF8.GetString(delivery.BasicProperties.Headers["x-version"] as byte[]);
+                                    var msgVersion = Version.Parse(versionHeader);
+                                    var curVersion = Version.Parse(version);
+
+                                    if(msgVersion > curVersion)
+                                    {
+                                        logger.Warn($"Upgrade needed to {versionHeader} from {version}");
+
+                                        if(OnUpdateNeeded!= null)
+                                        {
+                                            OnUpdateNeeded(versionHeader);
+                                        }
+                                    }
+
+                                    if(curVersion > msgVersion)
+                                    {
+                                        logger.Warn($"Consumer version is {version}. Publisher upgrade needed to {version} from {versionHeader}.");
+                                    }
+                                    
+                                }
+
+                                var message = serializer.DeserializeObject<T>(delivery.Body);
 
                                 reject = processMessage(message);
 
@@ -113,11 +147,12 @@ namespace Common.ServiceBus
                             catch (Exception ex)
                             {
                                 //TODO: store message in error queue
-                                Console.WriteLine("Topic consumer message processing error {0}", ex.Message);
+                                logger.LogException(ex, $"Topic {topic} consumer message processing error");
                             }
 
                             if (reject)
                             {
+                                // requeue message
                                 amqpChannel.BasicNack(delivery.DeliveryTag, false, true);
                             }
                             else
@@ -130,11 +165,11 @@ namespace Common.ServiceBus
                         {
                             if (stopPending)
                             {
-                                Console.WriteLine("Exiting! The topic consumer received a stop signal");
+                                logger.Info($"Exiting! The topic {topic} consumer received a stop signal");
                                 break;
                             }
 
-                            Console.WriteLine($"Topic consumer connection error {eox.Message} connection closed {!consumerConnection.IsOpen}");
+                            logger.Warn($"Retrying! Topic consumer connection error {eox.Message} connection closed {!consumerConnection.IsOpen}");
 
                             // wait for the connection to be restored
                             Thread.Sleep(amqpConnectionFactory.NetworkRecoveryInterval);
@@ -142,17 +177,21 @@ namespace Common.ServiceBus
                             // reinitialize consumer
                             if (consumerConnection.IsOpen && amqpChannel.IsOpen)
                             {
-                                Console.WriteLine($"Restoring topic {topic} queue and consumer");
+                                logger.Info($"Restoring topic {topic} queue and consumer");
                                 queueName = SetUpQueue(amqpChannel, topic);
                                 consumer = SetUpConsumer(amqpChannel, queueName);
                             }
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Exiting! The topic consumer encountered a fatal error {ex.Message}");
-
+                            logger.LogException(ex, $"Exiting! Topic {topic} consumer fatal error");
                             break;
                         }
+                    }
+
+                    if(OnConsumerExit!= null)
+                    {
+                        OnConsumerExit();
                     }
                 }
             }
@@ -192,12 +231,14 @@ namespace Common.ServiceBus
                     }
 
                     var props = amqpChannel.CreateBasicProperties();
-                    props.ContentType = "application/json";
-                    props.ContentEncoding = "utf-8";
                     props.Persistent = PersistentMessages;
+                    props.Headers = new Dictionary<string, object>();
+                    props.Headers.Add("x-version", version);
+                    props.ContentType = serializer.ContentType;
+                    props.ContentEncoding = serializer.ContentEncoding;
 
                     var routingKey = GetTopicsRoutingKey(topics);
-                    var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+                    var body = serializer.SerializeObject(message);
                     amqpChannel.BasicPublish(exchange: ExchangeName, routingKey: routingKey, basicProperties: props, body: body);
                 }
             }

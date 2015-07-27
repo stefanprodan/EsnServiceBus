@@ -58,7 +58,12 @@
     <Compile Include="Registry\RpcServer.cs" />
     <Compile Include="Registry\RpcSettings.cs" />
     <Compile Include="ServiceBus\ConnectionConfig.cs" />
+    <Compile Include="ServiceBus\ConsoleLog.cs" />
     <Compile Include="ServiceBus\FanoutFactory.cs" />
+    <Compile Include="ServiceBus\ILog.cs" />
+    <Compile Include="ServiceBus\IMessageSerializer.cs" />
+    <Compile Include="ServiceBus\GzipMessageSerializer.cs" />
+    <Compile Include="ServiceBus\JsonMessageSerializer.cs" />
     <Compile Include="ServiceBus\TopicFactory.cs" />
     <Compile Include="ServiceBus\Topics.cs" />
   </ItemGroup>

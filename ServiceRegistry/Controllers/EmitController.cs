@@ -1,15 +1,10 @@
 ﻿using Common.Registry;
 using Common.ServiceBus;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
 using ServiceRegistry.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace ServiceRegistry.Controllers
@@ -34,7 +29,7 @@ namespace ServiceRegistry.Controllers
         {
             var status = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
-            var topics = new TopicFactory(ConnectionConfig.GetFactoryDefault());
+            var topics = new TopicFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), status.Version);
             topics.PublishMessage(status, new string[] { Topics.Images, Topics.Text, Topics.Url, Topics.Video });
             return status;
         }
@@ -46,7 +41,7 @@ namespace ServiceRegistry.Controllers
         {
             var status = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
-            var pubsub = new FanoutFactory(ConnectionConfig.GetFactoryDefault());
+            var pubsub = new FanoutFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), status.Version);
             pubsub.PublishMessage(status);
 
             return status;

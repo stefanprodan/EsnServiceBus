@@ -9,22 +9,12 @@ namespace Common.ServiceBus
 {
     public class ConnectionConfig
     {
-        public static ConnectionFactory GetFactoryDefault(string host = "localhost")
+        public static ConnectionFactory GetFactoryDefault(string uri = null)
         {
-            //var factory = new ConnectionFactory()
-            //{
-            //    HostName = host,
-            //    Port = 5672,
-            //    UserName = "guest",
-            //    Password = "guest",
-            //    VirtualHost = "/",
-            //    AutomaticRecoveryEnabled = true,
-            //    NetworkRecoveryInterval = TimeSpan.FromSeconds(5),
-            //    RequestedHeartbeat = 60,
-            //};
+            uri = string.IsNullOrEmpty(uri) ?  "amqp://guest:guest@localhost:5672/%2f" : uri;
 
             var factory = new ConnectionFactory();
-            factory.Uri = "amqp://guest:guest@localhost:5672/%2f?heartbeat=60";
+            factory.Uri = uri;
             factory.AutomaticRecoveryEnabled = true;
             factory.NetworkRecoveryInterval = TimeSpan.FromSeconds(5);
 

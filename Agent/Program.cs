@@ -46,7 +46,7 @@ namespace Agent
         {
             foreach (var item in topics)
             {
-                var consumer = new TopicFactory(ConnectionConfig.GetFactoryDefault());
+                var consumer = new TopicFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), InstanceInfo.Version);
                 consumer.StartConsumerInBackground<ServiceInfo>(item, ProcessTopicMessage);
                 TopicConsumers.Add(consumer);
             }
@@ -56,7 +56,7 @@ namespace Agent
         {
             for (int i = 0; i < workers; i++)
             {
-                var consumer = new FanoutFactory(ConnectionConfig.GetFactoryDefault());
+                var consumer = new FanoutFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), InstanceInfo.Version);
                 consumer.StartConsumerInBackground<ServiceInfo>(ProcessPubSubMessage);
                 PubSubConsumers.Add(consumer);
             }
