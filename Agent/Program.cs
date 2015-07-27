@@ -47,7 +47,7 @@ namespace Agent
             foreach (var item in topics)
             {
                 var consumer = new TopicFactory(ConnectionConfig.GetFactoryDefault());
-                consumer.StartConsumerInBackground(item);
+                consumer.StartConsumerInBackground<ServiceInfo>(item, ProcessTopicMessage);
                 TopicConsumers.Add(consumer);
             }
         }
@@ -57,10 +57,26 @@ namespace Agent
             for (int i = 0; i < workers; i++)
             {
                 var consumer = new FanoutFactory(ConnectionConfig.GetFactoryDefault());
-                consumer.StartConsumerInBackground();
+                consumer.StartConsumerInBackground<ServiceInfo>(ProcessPubSubMessage);
                 PubSubConsumers.Add(consumer);
             }
+        }
 
+        static bool ProcessTopicMessage(ServiceInfo info)
+        {
+            var rejectMessage = false;
+
+            if (info != null && !string.IsNullOrEmpty(info.Version))
+            {
+                Console.WriteLine($"Service info received from {info.Pid}@{info.Name} via Topic");
+            }
+
+            return rejectMessage;
+        }
+
+        static void ProcessPubSubMessage(ServiceInfo info)
+        {
+            Console.WriteLine($"Service info received from {info.Pid}@{info.Name} via PubSub");
         }
 
     }

@@ -63,7 +63,7 @@ namespace Common.ServiceBus
             return consumer;
         }
 
-        public void StartConsumer()
+        public void StartConsumer<T>(Action<T> processMessage)
         {
             using (consumerConnection = amqpConnectionFactory.CreateConnection())
             {
@@ -77,12 +77,17 @@ namespace Common.ServiceBus
                         try
                         {
                             var delivery = consumer.Queue.Dequeue();
-                            var message = Encoding.UTF8.GetString(delivery.Body);
+                            var json = Encoding.UTF8.GetString(delivery.Body);
 
                             try
                             {
                                 Console.WriteLine(" [PubSub] Message received from '{0}' with topics len {1}",
-                                    queueName, message.Length);
+                                    queueName, json.Length);
+
+                                var message = JsonConvert.DeserializeObject<T>(json);
+
+                                processMessage(message);
+
                             }
                             catch (Exception ex)
                             {
@@ -125,9 +130,12 @@ namespace Common.ServiceBus
             }
         }
 
-        public void StartConsumerInBackground()
+        public void StartConsumerInBackground<T>(Action<T> processMessage)
         {
-            var backgroundThread = new Thread(StartConsumer);
+            var backgroundThread = new Thread(t =>
+            {
+                StartConsumer(processMessage);
+            });
             backgroundThread.IsBackground = true;
             backgroundThread.Start();
         }

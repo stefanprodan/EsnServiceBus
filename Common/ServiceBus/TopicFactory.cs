@@ -77,7 +77,13 @@ namespace Common.ServiceBus
             return consumer;
         }
 
-        public void StartConsumer(string topic)
+        /// <summary>
+        /// Opens a new connection, channel and session to receive and process messages 
+        /// </summary>
+        /// <typeparam name="T">message type</typeparam>
+        /// <param name="topic">topic name</param>
+        /// <param name="processMessage">takes the message object and returns a flag if the message should be rejected or not</param>
+        public void StartConsumer<T>(string topic, Func<T, bool> processMessage)
         {
             using (consumerConnection = amqpConnectionFactory.CreateConnection())
             {
@@ -90,13 +96,19 @@ namespace Common.ServiceBus
                     {
                         try
                         {
+                            var reject = false;
                             var delivery = consumer.Queue.Dequeue();
-                            var message = Encoding.UTF8.GetString(delivery.Body);
+                            var json = Encoding.UTF8.GetString(delivery.Body);
 
                             try
                             {
                                 Console.WriteLine(" [{0}] Message received from '{1}' with topics '{2}' len {3}",
-                                   topic.ToUpperInvariant(), queueName, delivery.RoutingKey, message.Length);
+                                   topic.ToUpperInvariant(), queueName, delivery.RoutingKey, json.Length);
+
+                                var message = JsonConvert.DeserializeObject<T>(json);
+
+                                reject = processMessage(message);
+
                             }
                             catch (Exception ex)
                             {
@@ -104,8 +116,15 @@ namespace Common.ServiceBus
                                 Console.WriteLine("Topic consumer message processing error {0}", ex.Message);
                             }
 
-                            // remove message from q
-                            amqpChannel.BasicAck(delivery.DeliveryTag, false);
+                            if (reject)
+                            {
+                                amqpChannel.BasicNack(delivery.DeliveryTag, false, true);
+                            }
+                            else
+                            {
+                                // remove message from queue
+                                amqpChannel.BasicAck(delivery.DeliveryTag, false);
+                            }
                         }
                         catch (EndOfStreamException eox)
                         {
@@ -139,11 +158,11 @@ namespace Common.ServiceBus
             }
         }
 
-        public void StartConsumerInBackground(string topic)
+        public void StartConsumerInBackground<T>(string topic, Func<T, bool> processMessage)
         {
             var backgroundThread = new Thread(t =>
             {
-                StartConsumer(topic);
+                StartConsumer(topic, processMessage);
             });
             backgroundThread.IsBackground = true;
             backgroundThread.Start();
