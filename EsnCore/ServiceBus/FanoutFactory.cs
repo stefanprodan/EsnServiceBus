@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace EsnCore.ServiceBus
 {
     /// <summary>
-    /// Publish/Subscribe provider without message or queue persistence
+    /// Multi-cast provider without message or queue persistence
     /// On server restart or network failure the consumers and queues are automatically restored
     /// </summary>
     public class FanoutFactory
@@ -30,8 +30,10 @@ namespace EsnCore.ServiceBus
         public string ExchangeName { get; set; }
         public bool DurableExchange { get; set; }
 
-        public Action OnConsumerExit { get; set; }
-        public Action<string> OnUpdateNeeded { get; set; }
+        /// <summary>
+        ///  This setting determines the maximum number of times the consumer will automatically try to reconnect
+        /// </summary>
+        public int RetryMax { get; set; }
 
         public FanoutFactory(ConnectionFactory connectionFactory, IMessageSerializer serializer, ILog logger, string version, string exchangeName = "esn.fanout", bool durableExchange = true)
         {
@@ -73,22 +75,33 @@ namespace EsnCore.ServiceBus
             return consumer;
         }
 
-        public void StartConsumer<T>(Action<T> processMessage)
+        public void StartConsumer<T>(IConsumer fanoutConsumer)
         {
+            var exitArgs = new ConsumerExitEventArgs();
             using (consumerConnection = amqpConnectionFactory.CreateConnection())
             {
                 using (var amqpChannel = consumerConnection.CreateModel())
                 {
                     var queueName = SetUpQueue(amqpChannel);
                     var consumer = SetUpConsumer(amqpChannel, queueName);
+                    var retryCount = 0;
+
+                    logger.Info($"The fanout consumer has started");
 
                     while (!stopPending)
                     {
                         try
                         {
-                            logger.Info($"The fanout consumer has started");
+                            exitArgs = new ConsumerExitEventArgs();
+                            exitArgs.Exchange = ExchangeName;
+                            exitArgs.Queue = queueName;
+                            exitArgs.RoutingKey = "";
 
+                            // blocks till the a message is received
                             var delivery = consumer.Queue.Dequeue();
+
+                            exitArgs.Message = delivery.Body;
+                            exitArgs.Headers = delivery.BasicProperties.Headers;
 
                             try
                             {
@@ -101,32 +114,29 @@ namespace EsnCore.ServiceBus
                                     var msgVersion = Version.Parse(versionHeader);
                                     var curVersion = Version.Parse(version);
 
-                                    if (msgVersion > curVersion)
+                                    if (msgVersion != curVersion)
                                     {
                                         logger.Warn($"Upgrade needed to {versionHeader} from {version}");
 
-                                        if (OnUpdateNeeded != null)
-                                        {
-                                            OnUpdateNeeded(versionHeader);
-                                        }
-                                    }
-
-                                    if (curVersion > msgVersion)
-                                    {
-                                        logger.Warn($"Consumer version is {version}. Publisher upgrade needed to {version} from {versionHeader}.");
+                                        fanoutConsumer.OnVersionMismatch(msgVersion, curVersion);
                                     }
 
                                 }
 
                                 var message = serializer.DeserializeObject<T>(delivery.Body);
 
-                                processMessage(message);
+                                fanoutConsumer.ProcessMessage(message);
+
+                                //reset counter
+                                retryCount = 0;
 
                             }
                             catch (Exception ex)
                             {
+                                exitArgs.UnderlyingException = ex;
+
                                 //TODO: store message in error queue
-                                logger.LogException(ex, $"Fanout consumer message processing error {ex.Message}");
+                                logger.LogException(ex, $"Message deleted! Fanout consumer message processing error {ex.Message}");
                             }
 
                             // remove message from q
@@ -137,6 +147,12 @@ namespace EsnCore.ServiceBus
                             if (stopPending)
                             {
                                 logger.Info("Exiting! The fanout consumer received a stop signal");
+                                break;
+                            }
+
+                            if (RetryMax > 0 && retryCount > RetryMax)
+                            {
+                                logger.LogException(eox, $"Exiting! The maximum of {RetryMax} retries has been reached, error {eox.Message}");
                                 break;
                             }
 
@@ -152,6 +168,14 @@ namespace EsnCore.ServiceBus
                                 queueName = SetUpQueue(amqpChannel);
                                 consumer = SetUpConsumer(amqpChannel, queueName);
                             }
+
+                            retryCount++;
+                        }
+                        catch (ConsumerException cex) when (cex.StopSignal)
+                        {
+                            exitArgs.UnderlyingException = cex;
+                            logger.LogException(cex, $"Fanout consumer encounter a processing error");
+                            break;
                         }
                         catch (Exception ex)
                         {
@@ -161,19 +185,16 @@ namespace EsnCore.ServiceBus
                         }
                     }
 
-                    if (OnConsumerExit != null)
-                    {
-                        OnConsumerExit();
-                    }
+                    fanoutConsumer.OnConsumerExit(exitArgs);
                 }
             }
         }
 
-        public void StartConsumerInBackground<T>(Action<T> processMessage)
+        public void StartConsumerInBackground<T>(IConsumer fanoutConsumer)
         {
             var backgroundThread = new Thread(t =>
             {
-                StartConsumer(processMessage);
+                StartConsumer<T>(fanoutConsumer);
             });
             backgroundThread.IsBackground = true;
             backgroundThread.Start();

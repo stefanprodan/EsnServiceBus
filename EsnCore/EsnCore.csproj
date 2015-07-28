@@ -60,6 +60,7 @@
     <Compile Include="ServiceBus\ConnectionConfig.cs" />
     <Compile Include="ServiceBus\ConsoleLog.cs" />
     <Compile Include="ServiceBus\ConsumerException.cs" />
+    <Compile Include="ServiceBus\RoutingType.cs" />
     <Compile Include="ServiceBus\ConsumerExitEventArgs.cs" />
     <Compile Include="ServiceBus\FanoutFactory.cs" />
     <Compile Include="ServiceBus\ILog.cs" />

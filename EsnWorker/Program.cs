@@ -51,26 +51,9 @@ namespace EsnWorker
             for (int i = 0; i < workers; i++)
             {
                 var consumer = new FanoutFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), InstanceInfo.Version);
-                consumer.StartConsumerInBackground<ServiceInfo>(ProcessPubSubMessage);
+                consumer.StartConsumerInBackground<ServiceInfo>(new FanoutConsumer());
                 PubSubConsumers.Add(consumer);
             }
-        }
-
-        static bool ProcessTopicMessage(ServiceInfo info)
-        {
-            var rejectMessage = false;
-
-            if (info != null && !string.IsNullOrEmpty(info.Version))
-            {
-                Console.WriteLine($"Service info received from {info.Pid}@{info.Name} via Topic");
-            }
-
-            return rejectMessage;
-        }
-
-        static void ProcessPubSubMessage(ServiceInfo info)
-        {
-            Console.WriteLine($"Service info received from {info.Pid}@{info.Name} via PubSub");
         }
 
     }

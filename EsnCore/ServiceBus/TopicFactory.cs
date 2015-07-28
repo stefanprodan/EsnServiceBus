@@ -168,6 +168,7 @@ namespace EsnCore.ServiceBus
                             {
                                 exitArgs.UnderlyingException = cex;
                                 logger.LogException(cex, $"Topic {topic} consumer encounter a processing error");
+                                break;
                             }
                             catch (Exception ex)
                             {
@@ -203,7 +204,7 @@ namespace EsnCore.ServiceBus
                                 break;
                             }
 
-                            logger.Warn($"Retrying! Topic consumer connection error {eox.Message} connection closed {!consumerConnection.IsOpen}");
+                            logger.Warn($"Retrying! Topic consumer connection error {eox.Message}");
 
                             // wait for the connection to be restored
                             Thread.Sleep(amqpConnectionFactory.NetworkRecoveryInterval);
@@ -219,7 +220,7 @@ namespace EsnCore.ServiceBus
                         }
                         catch (Exception ex)
                         {
-                            logger.LogException(ex, $"Exiting! Topic {topic} consumer fatal error");
+                            logger.LogException(ex, $"Exiting! Topic {topic} consumer encountered a fatal error {ex.Message}");
                             break;
                         }
                     }
