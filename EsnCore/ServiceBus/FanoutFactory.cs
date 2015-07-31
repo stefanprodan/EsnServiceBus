@@ -52,8 +52,6 @@ namespace EsnCore.ServiceBus
 
         private string SetUpQueue(IModel amqpChannel)
         {
-            SetUpExchange(amqpChannel);
-
             // generate non durable queue
             var queueName = amqpChannel.QueueDeclare().QueueName;
 
@@ -82,6 +80,7 @@ namespace EsnCore.ServiceBus
             {
                 using (var amqpChannel = consumerConnection.CreateModel())
                 {
+                    SetUpExchange(amqpChannel);
                     var queueName = SetUpQueue(amqpChannel);
                     var consumer = SetUpConsumer(amqpChannel, queueName);
                     var retryCount = 0;
@@ -165,6 +164,7 @@ namespace EsnCore.ServiceBus
                             if (consumerConnection.IsOpen && amqpChannel.IsOpen)
                             {
                                 logger.Info($"Restoring fanout queue and consumer");
+                                SetUpExchange(amqpChannel);
                                 queueName = SetUpQueue(amqpChannel);
                                 consumer = SetUpConsumer(amqpChannel, queueName);
                             }

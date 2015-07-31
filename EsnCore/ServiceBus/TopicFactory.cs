@@ -102,6 +102,7 @@ namespace EsnCore.ServiceBus
             {
                 using (var amqpChannel = consumerConnection.CreateModel())
                 {
+                    SetUpExchange(amqpChannel);
                     var queueName = SetUpQueue(amqpChannel, topic);
                     var consumer = SetUpConsumer(amqpChannel, queueName);
                     var retryCount = 0;
@@ -213,6 +214,7 @@ namespace EsnCore.ServiceBus
                             if (consumerConnection.IsOpen && amqpChannel.IsOpen)
                             {
                                 logger.Info($"Restoring topic {topic} queue and consumer");
+                                SetUpExchange(amqpChannel);
                                 queueName = SetUpQueue(amqpChannel, topic);
                                 consumer = SetUpConsumer(amqpChannel, queueName);
                             }
