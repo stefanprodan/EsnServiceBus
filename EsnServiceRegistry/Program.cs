@@ -12,19 +12,22 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EsnServiceRegistry.Store;
 
 namespace EsnServiceRegistry
 {
     class Program
     {
         internal static ServiceInfo ServiceStatus;
-        internal static RpcServer ServiceRegistryServer;
+        internal static RpcServer<ServiceInfo> ServiceRegistryServer;
 
         static void Main(string[] args)
         {
             ServiceStatus = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
-            ServiceRegistryServer = new RpcServer(ConnectionConfig.GetFactoryDefault(), RpcSettings.RegistryQueue);
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+
+            ServiceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RpcSettings.RegistryQueue, registryRepo.InsertOrUpdateService);
             ServiceRegistryServer.StartInBackground();
 
             var webServer = WebApp.Start<Startup>(url: ServiceConfig.Reader.GetBaseAddress());

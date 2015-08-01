@@ -3,6 +3,7 @@ using EsnCore.Registry;
 using EsnCore.ServiceBus;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace EsnWorker
 {
@@ -25,6 +26,7 @@ namespace EsnWorker
 
                 StartTopicWorkers(Topics.Text, Topics.Url, Topics.Images, Topics.Video);
                 StartPubSubWorkers(2);
+                StartPringThread(rpc);
 
             }
             else
@@ -33,6 +35,22 @@ namespace EsnWorker
             }
 
             Console.ReadLine();
+        }
+
+        static void StartPringThread(RpcClient rpc)
+        {
+            var th = new Thread(t =>
+            {
+                while (true)
+                {
+                    var info = ServiceInfoFactory.CreateServiceDefinition(InstanceInfo);
+                    rpc.Sync(info, TimeSpan.FromSeconds(60));
+
+                    Thread.Sleep(1000);
+                }
+            });
+            th.IsBackground = true;
+            th.Start();
         }
 
         static void StartTopicWorkers(params string[] topics)

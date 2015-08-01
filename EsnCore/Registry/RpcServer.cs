@@ -9,20 +9,21 @@ using System.Threading.Tasks;
 
 namespace EsnCore.Registry
 {
-    public class RpcServer
+    public class RpcServer<T>
     {
         private ConnectionFactory amqpConnectionFactory;
         private IConnection amqpConnection;
         private string queueName;
         private volatile bool stopPending;
         private Thread backgroundThread;
-        
+        Func<T, T> messageProcess;
 
-        public RpcServer(ConnectionFactory connectionFactory, string queue)
+
+        public RpcServer(ConnectionFactory connectionFactory, string queue, Func<T, T> process)
         {
             amqpConnectionFactory = connectionFactory;
             queueName = queue;
-
+            messageProcess = process;
             backgroundThread = new Thread(Start);
             backgroundThread.IsBackground = true;
         }
@@ -61,28 +62,12 @@ namespace EsnCore.Registry
                             try
                             {
                                 var message = Encoding.UTF8.GetString(body);
-                                var serviceInfo = JsonConvert.DeserializeObject<ServiceInfo>(message);
+                                var inObj = JsonConvert.DeserializeObject<T>(message);
+                                var outObj = messageProcess(inObj);
 
-                                Console.WriteLine($"{serviceInfo.Name} info received from {serviceInfo.Pid}@{serviceInfo.HostName}:{serviceInfo.Port}");
+                                Console.WriteLine($"Message received from service");
 
-                                if (string.IsNullOrEmpty(serviceInfo.Guid))
-                                {
-                                    serviceInfo.Guid = Guid.NewGuid().ToString();
-                                    serviceInfo.RegisterDate = DateTime.UtcNow;
-                                    serviceInfo.LastPingDate = DateTime.UtcNow;
-
-                                    //TODO: db insert
-                                }
-                                else
-                                {
-                                    serviceInfo.LastPingDate = DateTime.UtcNow;
-
-                                    //TODO: db update
-                                }
-
-
-
-                                response = JsonConvert.SerializeObject(serviceInfo);
+                                response = JsonConvert.SerializeObject(outObj);
                             }
                             catch (Exception ex)
                             {

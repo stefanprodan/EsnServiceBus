@@ -8,18 +8,17 @@ using System.Threading.Tasks;
 
 namespace EsnCore.Registry
 {
-    [Description("services")]
     public class ServiceInfo
     {
-        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
-        public string Id { get; set; }
-
         // identifiers
+        public string Id { get; set; }
+        public string HostGuid { get; set; }
         public string Guid { get; set; }
         public string Name { get; set; }
         public string Version { get; set; }
         public DateTime BuildDate { get; set; }
         public DateTime RegisterDate { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
 
         // network
         public string HostName { get; set; }
@@ -29,12 +28,13 @@ namespace EsnCore.Registry
         public int Pid { get; set; }
         public DateTime StartDate { get; set; }       
         public long MemoryUsage { get; set; }
-        public string OSVersion { get; set; }
         public string LocalPath { get; set; }
 
         // status
         public DateTime LastPingDate { get; set; }
         public ServiceState State { get; set; }
+
+        public HostInfo Host { get; set; }
 
     }
 }

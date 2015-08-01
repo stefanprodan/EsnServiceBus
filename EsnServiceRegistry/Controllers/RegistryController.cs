@@ -1,5 +1,6 @@
 ﻿using EsnCore.Registry;
 using EsnServiceRegistry.Models;
+using EsnServiceRegistry.Store;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,14 @@ namespace EsnServiceRegistry.Controllers
     [RoutePrefix("registry")]
     public class RegistryController : ApiController
     {
+        [Route("active")]
+        [HttpGet]
+        public List<ServiceInfo> GetActiveServices()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllActiveServices(1);
+        }
+
         [Route("ping")]
         [HttpGet]
         public HttpResponseMessage Ping()
