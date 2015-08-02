@@ -15,6 +15,22 @@ namespace EsnServiceRegistry.Controllers
     [RoutePrefix("registry")]
     public class RegistryController : ApiController
     {
+        [Route("hosts")]
+        [HttpGet]
+        public List<HostInfo> GetHosts()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllHosts();
+        }
+
+        [Route("running")]
+        [HttpGet]
+        public List<ServiceInfo> GetServices()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllServices(ServiceState.Running);
+        }
+
         [Route("active")]
         [HttpGet]
         public List<ServiceInfo> GetActiveServices()

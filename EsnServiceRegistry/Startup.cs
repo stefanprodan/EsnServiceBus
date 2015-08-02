@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.Owin;
 using Owin;
 using System.Web.Http;
+using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.StaticFiles;
 
 [assembly: OwinStartup(typeof(EsnServiceRegistry.Startup))]
 
@@ -25,6 +27,18 @@ namespace EsnServiceRegistry
             );
 
             app.UseWebApi(config);
+
+            // Configure Web API for static files
+            var physicalFileSystem = new PhysicalFileSystem(@".\www");
+            var options = new FileServerOptions
+            {
+                EnableDefaultFiles = true,
+                FileSystem = physicalFileSystem
+            };
+            options.StaticFileOptions.FileSystem = physicalFileSystem;
+            options.StaticFileOptions.ServeUnknownFileTypes = true;
+            options.DefaultFilesOptions.DefaultFileNames = new[] { "index.html" };
+            app.UseFileServer(options);
         }
     }
 }
