@@ -1,6 +1,10 @@
-angular.module('esnDashboard', [
-  'siTable'
-]).filter('bytes', function () {
+var esnApp = angular.module('esnApp', [
+    'ngRoute',
+    'siTable',
+    'mgcrea.ngStrap'
+]);
+
+esnApp.filter('bytes', function () {
     return function (bytes, precision) {
         if (bytes === 0) { return '0 bytes' }
         if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
@@ -14,19 +18,57 @@ angular.module('esnDashboard', [
     }
 });
 
-angular.module('esnDashboard').controller('servicesTable', function ($scope, $http) {
-  $scope.filter = {
-    $: ''
-  };
-  $scope.params = {};
+esnApp.config(['$routeProvider',
+  function ($routeProvider) {
+      $routeProvider.
+        when('/dashboard', {
+            templateUrl: 'partials/dashboard.html',
+            controller: 'DashboardCtrl'
+        }).
+        when('/services', {
+            templateUrl: 'partials/services.html',
+            controller: 'ServicesCtrl'
+        }).
+        when('/hosts', {
+            templateUrl: 'partials/hosts.html',
+            controller: 'HostsCtrl'
+        }).
+        otherwise({
+            redirectTo: '/dashboard'
+        });
+  }]);
 
-  var url = 'registry/running';
-  $http.get(url).then(function(services) {
-      $scope.services = services.data;
-  });
+esnApp.controller('DashboardCtrl', function ($scope, $http) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+
+    var url = 'registry/dashboard';
+    $http.get(url).then(function (dashboard) {
+        $scope.info = dashboard.data;
+    }, function (err) {
+        $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
 });
 
-angular.module('esnDashboard').controller('hostsTable', function ($scope, $http) {
+esnApp.controller('ServicesCtrl', function ($scope, $http) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+
+    var url = 'registry/running';
+    $http.get(url).then(function (services) {
+        $scope.services = services.data;
+    }, function (err) {
+        $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
+
+    
+});
+
+esnApp.controller('HostsCtrl', function ($scope, $http) {
     $scope.filter = {
         $: ''
     };
@@ -35,6 +77,8 @@ angular.module('esnDashboard').controller('hostsTable', function ($scope, $http)
     var url = 'registry/hosts';
     $http.get(url).then(function (hosts) {
         $scope.hosts = hosts.data;
+    }, function (err) {
+        $scope.error = 'The server cannot be reached at the moment, please try again.';
     });
 });
 

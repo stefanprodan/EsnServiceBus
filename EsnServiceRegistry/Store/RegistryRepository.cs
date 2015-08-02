@@ -17,6 +17,18 @@ namespace EsnServiceRegistry.Store
 
         #region Services
 
+        public void GetTotals(out int services, out int hosts, int activeMinutesAgo = 1000)
+        {
+            services = 0;
+            hosts = 0;
+
+            var date = DateTime.UtcNow.AddMinutes((-1) * activeMinutesAgo);
+            var running = (int)ServiceState.Running;
+            services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").Where(s => s.State == running)).Count();
+            hosts = r.Run(r.Hosts.Between(date, DateTime.UtcNow, "idx_date")).Count();
+
+        }
+
         public ServiceInfo GetService(string guid)
         {
             ServiceInfo info = null;

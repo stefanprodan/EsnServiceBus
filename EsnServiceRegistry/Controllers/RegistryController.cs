@@ -15,6 +15,24 @@ namespace EsnServiceRegistry.Controllers
     [RoutePrefix("registry")]
     public class RegistryController : ApiController
     {
+        [Route("dashboard")]
+        [HttpGet]
+        public DashboardModel GetDashboard()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            var dash = new DashboardModel
+            {
+                Registry = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) })
+            };
+            dash.AmqpAdmin = ServiceConfig.Reader.AmqpAdmin;
+            dash.RethinkAdmin = ServiceConfig.Reader.RethinkAdmin;
+            int services, hosts;
+            registryRepo.GetTotals(out services, out hosts);
+            dash.ServicesCount = services;
+            dash.HostsCount = hosts;
+            return dash;
+        }
+
         [Route("hosts")]
         [HttpGet]
         public List<HostInfo> GetHosts()

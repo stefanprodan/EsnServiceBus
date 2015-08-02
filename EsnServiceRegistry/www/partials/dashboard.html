@@ -1,0 +1,160 @@
+﻿<div ng-controller="DashboardCtrl">
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-object-ungroup fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ info.ServicesCount }}</div>
+                            <div>Running services</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#/services">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-server fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ info.HostsCount }}</div>
+                            <div>Registered hosts</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#/hosts">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-exchange fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">AMQP</div>
+                            <div>RabbitMQ Cluster</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ info.AmqpAdmin }}" target="_blank">
+                    <div class="panel-footer">
+                        <span class="pull-left">Open dashboard</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-database fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">NoSQL</div>
+                            <div>RethinkDB Cluster</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ info.RethinkAdmin }}" target="_blank">
+                    <div class="panel-footer">
+                        <span class="pull-left">Open dashboard</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+        <table class="table table-striped">
+            <caption>Service Registry Server details</caption>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Service name</td>
+                    <td>{{ info.Registry.Name }}</td>
+                </tr>
+                <tr>
+                    <td>Version</td>
+                    <td>{{ info.Registry.Version }}</td>
+                </tr>
+                <tr>
+                    <td>Build date</td>
+                    <td>{{ info.Registry.BuildDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                </tr>
+                <tr>
+                    <td>Start date</td>
+                    <td>{{ info.Registry.StartDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                </tr>
+                <tr>
+                    <td>Pid</td>
+                    <td>{{ info.Registry.Pid }}</td>
+                </tr>
+                <tr>
+                    <td>Local path</td>
+                    <td>{{ info.Registry.LocalPath }}</td>
+                </tr>
+                <tr>
+                    <td>Memory usage</td>
+                    <td>{{ info.Registry.MemoryUsage }} MB</td>
+                </tr>
+                <tr>
+                    <td>Host name</td>
+                    <td>{{ info.Registry.Host.Name }}</td>
+                </tr>
+                <tr>
+                    <td>Host OS</td>
+                    <td>{{ info.Registry.Host.OSVersion }}</td>
+                </tr>
+                <tr>
+                    <td>Host total memory</td>
+                    <td>{{ info.Registry.Host.TotalMemory | bytes }}</td>
+                </tr>
+                <tr>
+                    <td>Host free memory</td>
+                    <td>{{ info.Registry.Host.FreeMemory | bytes }}</td>
+                </tr>
+                <tr>
+                    <td>Host logical processors</td>
+                    <td>{{ info.Registry.Host.CPUs }}</td>
+                </tr>
+                <tr>
+                    <td>Host BIOS ID</td>
+                    <td>{{ info.Registry.Host.Guid }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+</div>

@@ -1,0 +1,67 @@
+﻿<div ng-controller="ServicesCtrl">
+
+    <div class="row" ng-if="services">
+        <div class="col-md-6">
+            <h3>Running services: {{ services.length }}</h3>
+        </div>
+    </div>
+    <hr />
+    <form class="form" ng-if="services">
+        <div class="form-group">
+            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
+        </div>
+    </form>
+
+    <table class="table" ng-if="services" si-table>
+        <thead>
+            <tr>
+                <th sort-by="Name">Service</th>
+                <th sort-by="MemoryUsage">Memory (MB)</th>
+                <th sort-by="HostName">Host</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in services | filter:filter as srvResults">
+                <td>
+                    <strong><a href="{{ service.Id }}">{{ service.Name }}</a></strong><br />
+                    <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
+                    <span class="text-muted">Port:</span> {{ service.Port }}<br />
+                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
+                    <span class="text-muted">Guid:</span> {{ service.Guid }}<br />
+                    <span class="text-muted">Path:</span> {{ service.LocalPath }}
+                </td>
+                <td>{{ service.MemoryUsage }}</td>
+                <td><a href="#/hosts">{{ service.HostName }}</a></td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                <td>
+                    <span ng-repeat="label in service.Tags">
+                        <span class="label label-default">
+                            {{ label }}
+                        </span>
+                        <br>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div class="alert alert-info" ng-if="!services && !error">
+        Loading ...
+    </div>
+
+    <div class="alert alert-danger" ng-if="error">
+       {{ error }}
+    </div>
+
+</div>
+
+

@@ -1,0 +1,65 @@
+﻿<div ng-controller="HostsCtrl">
+
+    <div class="row" ng-if="hosts">
+        <div class="col-sm-6">
+            <h3>Running hosts: {{ hosts.length }}</h3>
+        </div>
+    </div>
+    <hr />
+    <form class="form" ng-if="hosts">
+        <div class="form-group">
+            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
+        </div>
+    </form>
+
+    <table class="table" ng-if="hosts" si-table>
+        <thead>
+            <tr>
+                <th sort-by="Name">Host</th>
+                <th sort-by="Location">Location</th>
+                <th sort-by="FreeMemory">Free RAM</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="host in hosts | filter:filter">
+                <td>
+                    <strong><a href="{{ host.Id }}">{{ host.Name }}</a></strong><br />
+                    <span class="text-muted">Logical processors:</span> {{ host.CPUs }}<br />
+                    <span class="text-muted">Total memory:</span> {{ host.TotalMemory | bytes }}<br />
+                    <span class="text-muted">Used memory:</span> {{ (((host.TotalMemory-host.FreeMemory)/host.TotalMemory)*100).toFixed(2) }}&#37;<br />
+                    <span class="text-muted">OS:</span> {{ host.OSVersion }}<br />
+                    <span class="text-muted">BIOS ID:</span> {{ host.Guid }}
+                </td>
+                <td>{{ host.Location?(host.Location):"Not set" }}</td>
+                <td>{{ host.FreeMemory | bytes }}</td>
+                <td>{{ host.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                <td>
+                    <span ng-repeat="label in host.Tags">
+                        <span class="label label-default">
+                            {{ label }}
+                        </span>
+                        <br>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div class="alert alert-info" ng-if="!hosts && !error">
+        Loading ...
+    </div>
+
+    <div class="alert alert-danger" ng-if="error">
+       {{ error }}
+    </div>
+
+</div>

@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" ng-app="esnDashboard">
+<html lang="en" ng-app="esnApp">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,144 +9,41 @@
 
     <link href="content/css/bootstrap.min.css" rel="stylesheet">
     <link href="content/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="content/css/font-awesome.min.css" rel="stylesheet">
     <script src="content/js/angular.min.js"></script>
+    <script src="content/js/angular-route.min.js"></script>
+    <script src="content/js/angular-strap.min.js"></script>
+    <script src="content/js/angular-strap.tpl.js"></script>
     <script src="content/js/si-table.min.js"></script>
     <script src="app/app.js"></script>
 </head>
 <body>
     <div class="container">
 
-        <div ng-controller="servicesTable">
-
-            <div class="page-header">
-                <h1>Services</h1>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-6">
-                    <p>Running services: {{ services.length }}</p>
+        <nav class="navbar navbar-default" bs-navbar>
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#/dashboard">ESN Service Registry</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li data-match-route="/dashboard"><a href="#/dashboard">Dashboard</a></li>
+                        <li data-match-route="/services"><a href="#/services">Services</a></li>
+                        <li data-match-route="/hosts"><a href="#/hosts">Hosts</a></li>
+                        <li><a href="https://github.com/stefanprodan/EsnServiceBus" target="_blank">About</a></li>
+                    </ul>
                 </div>
             </div>
+        </nav>
 
-            <form class="form">
-                <div class="form-group">
-                    <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
-                </div>
-            </form>
+        <div ng-view></div>
 
-            <table class="table" si-table>
-                <thead>
-                    <tr>
-                        <th sort-by="Name">Service</th>
-                        <th sort-by="MemoryUsage">Memory (MB)</th>
-                        <th sort-by="HostName">Host</th>
-                        <th sort-by="LastPingDate" sort-init="desc">Last active</th>
-                        <th>Tags</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr si-sortable="single" ng-repeat="service in services | filter:filter as srvResults">
-                        <td>
-                            <strong><a href="{{ service.Id }}">{{ service.Name }}</a></strong><br />
-                            <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
-                            <span class="text-muted">Port:</span> {{ service.Port }}<br />
-                            <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
-                            <span class="text-muted">Guid:</span> {{ service.Guid }}<br />
-                            <span class="text-muted">Path:</span> {{ service.LocalPath }}
-                        </td>
-                        <td>{{ service.MemoryUsage }}</td>
-                        <td><a href="{{ service.HostGuid }}">{{ service.HostName }}</a></td>
-                        <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
-                        <td>
-                            <span ng-repeat="label in service.Tags">
-                                <span class="label label-default">
-                                    {{ label }}
-                                </span>
-                                <br>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="5">
-                            <si-table-pagination limit="5" />
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div class="alert alert-info" ng-if="!services">
-                Loading ...
-            </div>
-
-        </div>
-
-        <div ng-controller="hostsTable">
-
-            <div class="page-header">
-                <h1>Hosts</h1>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-6">
-                    <p>Running hosts: {{ hosts.length }}</p>
-                </div>
-            </div>
-
-            <form class="form">
-                <div class="form-group">
-                    <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
-                </div>
-            </form>
-
-            <table class="table" si-table>
-                <thead>
-                    <tr>
-                        <th sort-by="Name">Host</th>
-                        <th sort-by="Location">Location</th>
-                        <th sort-by="FreeMemory">Free RAM</th>
-                        <th sort-by="LastPingDate" sort-init="desc">Last active</th>
-                        <th>Tags</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr si-sortable="single" ng-repeat="host in hosts | filter:filter">
-                        <td>
-                            <strong><a href="{{ host.Id }}">{{ host.Name }}</a></strong><br />
-                            <span class="text-muted">Logical processors:</span> {{ host.CPUs }}<br />
-                            <span class="text-muted">Total memory:</span> {{ host.TotalMemory | bytes }}<br />
-                            <span class="text-muted">Used memory:</span> {{ (((host.TotalMemory-host.FreeMemory)/host.TotalMemory)*100).toFixed(2) }}&#37;<br />
-                            <span class="text-muted">OS:</span> {{ host.OSVersion }}<br />
-                            <span class="text-muted">BIOS ID:</span> {{ host.Guid }}
-                        </td>
-                        <td>{{ host.Location?(host.Location):"Not set" }}</td>
-                        <td>{{ host.FreeMemory | bytes }}</td>
-                        <td>{{ host.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
-                        <td>
-                            <span ng-repeat="label in host.Tags">
-                                <span class="label label-default">
-                                    {{ label }}
-                                </span>
-                                <br>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="5">
-                            <si-table-pagination limit="5" />
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div class="alert alert-info" ng-if="!hosts">
-                Loading ...
-            </div>
-
-        </div>
     </div>
 </body>
 </html>

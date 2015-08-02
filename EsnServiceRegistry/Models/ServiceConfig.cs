@@ -27,6 +27,30 @@ namespace EsnServiceRegistry.Models
             }
         }
 
+        public string AmqpUri
+        {
+            get
+            {
+                return ReadString("AmqpUri");
+            }
+        }
+
+        public string AmqpAdmin
+        {
+            get
+            {
+                return ReadString("AmqpAdmin");
+            }
+        }
+
+        public string RethinkAdmin
+        {
+            get
+            {
+                return ReadString("RethinkAdmin");
+            }
+        }
+
         public IEnumerable<string> AuthorizedTokens
         {
             get
