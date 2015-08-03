@@ -1,8 +1,10 @@
 ﻿using EsnCore.Helpers;
+using EsnCore.ServiceBus;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -46,9 +48,12 @@ namespace EsnCore.Registry
             using (var proc = Process.GetCurrentProcess())
             {
                 ms.Pid = proc.Id;
-                ms.Name = proc.ProcessName.Replace(".exe", string.Empty);
+                if (string.IsNullOrEmpty(ms.Name))
+                {
+                    ms.Name = proc.ProcessName.Replace(".exe", string.Empty);
+                }
                 ms.StartDate = proc.StartTime.ToUniversalTime();
-                ms.CpuTime = proc.TotalProcessorTime;
+                ms.CpuTime = proc.TotalProcessorTime.TotalSeconds;
             }
 
             if (ms.Port == 0)
@@ -57,6 +62,29 @@ namespace EsnCore.Registry
             }
 
             return ms;
+        }
+
+        public static void SaveToDisk(ServiceInfo ms)
+        {
+            var ser = new JsonMessageSerializer();
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ms.Name + ".json");
+            File.WriteAllBytes(path, ser.SerializeObject(ms));
+        }
+
+        public static ServiceInfo LoadFromDisk(string serviceName)
+        {
+            var ser = new JsonMessageSerializer();
+
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, serviceName + ".json");
+            if (File.Exists(path))
+            {
+                var data = File.ReadAllBytes(path);
+                return ser.DeserializeObject<ServiceInfo>(data);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private static long GetTotalMemory()

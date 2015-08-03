@@ -28,7 +28,7 @@ namespace EsnCore.Registry
         public int Pid { get; set; }
         public DateTime StartDate { get; set; }       
         public long MemoryUsage { get; set; }
-        public TimeSpan CpuTime { get; set; }
+        public double CpuTime { get; set; }
         public string LocalPath { get; set; }
 
         // status

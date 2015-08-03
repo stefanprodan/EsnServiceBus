@@ -53,6 +53,7 @@
     <Compile Include="Helpers\ProcessHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry\HostInfo.cs" />
+    <Compile Include="Registry\RegistryClient.cs" />
     <Compile Include="Registry\ServiceInfo.cs" />
     <Compile Include="Registry\ServiceInfoFactory.cs" />
     <Compile Include="Registry\ServiceState.cs" />
