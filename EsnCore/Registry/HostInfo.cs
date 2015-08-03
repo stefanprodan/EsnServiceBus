@@ -20,6 +20,7 @@ namespace EsnCore.Registry
         public string Location { get; set; }
         public DateTime RegisterDate { get; set; }
         public DateTime LastPingDate { get; set; }
+        public bool IsDisconnect { get; set; }
         public List<ServiceInfo> Services { get; set; } = new List<ServiceInfo>();
     }
 }

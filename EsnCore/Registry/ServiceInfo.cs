@@ -28,11 +28,13 @@ namespace EsnCore.Registry
         public int Pid { get; set; }
         public DateTime StartDate { get; set; }       
         public long MemoryUsage { get; set; }
+        public TimeSpan CpuTime { get; set; }
         public string LocalPath { get; set; }
 
         // status
         public DateTime LastPingDate { get; set; }
         public ServiceState State { get; set; }
+        public bool IsDisconnect { get; set; }
 
         public HostInfo Host { get; set; }
 

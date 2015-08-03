@@ -1,0 +1,134 @@
+﻿<div>
+    <div class="row" ng-if="host">
+        <div class="col-md-6">
+            <h3>Host {{ host.Name }}</h3>
+        </div>
+    </div>
+    <hr />
+    <div class="row" ng-if="host">
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-th fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ host.CPUs }}</div>
+                            <div>Logical processors</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-list fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ host.TotalMemory | bytes }}</div>
+                            <div>Total memory</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped" ng-if="host">
+        <caption>Host details</caption>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Name</td>
+                <td>{{ host.Name }}</td>
+            </tr>
+            <tr>
+                <td>Location</td>
+                <td>{{ host.Location?(host.Location):"Not set" }}</td>
+            </tr>
+            <tr>
+                <td>Tags</td>
+                <td><span ng-repeat="tag in host.Tags">{{tag}}{{$last ? '' : ', '}}</span></td>
+            </tr>
+            <tr>
+                <td>OS</td>
+                <td>{{ host.OSVersion }}</td>
+            </tr>
+            <tr>
+                <td>Used memory</td>
+                <td>{{ (((host.TotalMemory-host.FreeMemory)/host.TotalMemory)*100).toFixed(2) }}&#37;</td>
+            </tr>
+            <tr>
+                <td>Free memory</td>
+                <td>{{ host.FreeMemory | bytes }}</td>
+            </tr>
+            <tr>
+                <td>Logical processors</td>
+                <td>{{ host.CPUs }}</td>
+            </tr>
+            <tr>
+                <td>BIOS ID</td>
+                <td>{{ host.Guid }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr />
+
+    <table class="table" ng-if="host" si-table>
+        <caption>Active services in the last hour</caption>
+        <thead>
+            <tr>
+                <th sort-by="Name">Service</th>
+                <th sort-by="MemoryUsage">Memory (MB)</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in host.Services | filter:filter">
+                <td>
+                    <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
+                    <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
+                    <span class="text-muted">Port:</span> {{ service.Port }}<br />
+                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
+                    <span class="text-muted">Guid:</span> {{ service.Guid }}<br />
+                    <span class="text-muted">Path:</span> {{ service.LocalPath }}
+                </td>
+                <td>{{ service.MemoryUsage }}</td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                <td>
+                    <span ng-repeat="label in service.Tags">
+                        <span class="label label-default">
+                            {{ label }}
+                        </span>
+                        <br>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="alert alert-info" ng-if="!host && !error">
+        Loading ...
+    </div>
+
+    <div class="alert alert-danger" ng-if="error">
+        {{ error }}
+    </div>
+</div>

@@ -10,6 +10,8 @@ namespace EsnServiceRegistry.Store
 {
     public class RegistryRepository : BaseRepository
     {
+        
+
         public RegistryRepository(RegistryDatabaseFactory databaseFactory)
             : base(databaseFactory)
         {
@@ -29,15 +31,17 @@ namespace EsnServiceRegistry.Store
 
         }
 
+        
+
         public ServiceInfo GetService(string guid)
         {
             ServiceInfo info = null;
-            var service = r.Run(r.Services.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
+            var service = r.Run(r.Services.GetAll(guid, "idx_guid").OrderByDescending(s => s.LastPingDate).Limit(1)).FirstOrDefault();
 
             if (service != null)
             {
                 info = service.ToServiceInfo();
-
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
                 var host = r.Run(r.Hosts.GetAll(info.HostGuid, "idx_guid").Limit(1)).FirstOrDefault();
                 if (host != null)
                 {
@@ -55,7 +59,9 @@ namespace EsnServiceRegistry.Store
             var services = r.Run(r.Services.OrderByDescending("idx_date").Where(s => s.State == stat)).ToList();
             foreach (var item in services)
             {
-                list.Add(item.ToServiceInfo());
+                var info = item.ToServiceInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                list.Add(info);
             }
 
             return list;
@@ -70,7 +76,9 @@ namespace EsnServiceRegistry.Store
             var services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").OrderByDescending("idx_date").Where(s => s.State == running)).ToList();
             foreach (var item in services)
             {
-                list.Add(item.ToServiceInfo());
+                var info = item.ToServiceInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                list.Add(info);
             }
 
             return list;
@@ -88,7 +96,7 @@ namespace EsnServiceRegistry.Store
             var model = ServiceModel.FromServiceInfo(info);
             var host = InsertOrUpdateHost(info.Host);
 
-            var service = r.Run(r.Services.Filter(x => x.Guid == info.Guid).Limit(1)).FirstOrDefault();
+            var service = r.Run(r.Services.OrderByDescending("idx_date").Where(x => x.Guid == info.Guid).Limit(1)).FirstOrDefault();
 
             if (service == null)
             {
@@ -99,8 +107,7 @@ namespace EsnServiceRegistry.Store
             }
             else
             {
-                model.Id = service.Id;
-                model.RegisterDate = service.RegisterDate;
+                // merge tags for db with received ones
                 foreach (var tag in service.Tags)
                 {
                     if (!model.Tags.Contains(tag))
@@ -109,7 +116,25 @@ namespace EsnServiceRegistry.Store
                     }
                 }
 
-                r.Run(r.Services.Update(h => model));
+                // insert new if pid changed
+                if (info.Pid != model.Pid)
+                {
+                    model.RegisterDate = DateTime.UtcNow;
+
+                    var response = r.Run(r.Services.Insert(model));
+                    model.Id = response.GeneratedKeys.FirstOrDefault();
+
+                    //update last instance status
+                    service.State = (int)ServiceState.Stopped;
+                    r.Run(r.Services.Update(h => service));
+                }
+                else
+                {
+                    model.Id = service.Id;
+                    model.RegisterDate = service.RegisterDate;
+
+                    r.Run(r.Services.Update(h => model));
+                }
             }
 
             return model.ToServiceInfo();
@@ -117,7 +142,7 @@ namespace EsnServiceRegistry.Store
 
         public ServiceInfo UpdateServiceTags(string guid, List<string> tags)
         {
-            var service = r.Run(r.Services.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
+            var service = r.Run(r.Services.GetAll(guid, "idx_guid").OrderByDescending(s => s.LastPingDate).Limit(1)).FirstOrDefault();
             service.Tags = tags;
 
             r.Run(r.Services.Update(h => service));
@@ -137,11 +162,14 @@ namespace EsnServiceRegistry.Store
             if (host != null)
             {
                 info = host.ToHostInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
                 var date = DateTime.UtcNow.AddMinutes((-1) * serviceActiveMinutesAgo);
                 var services = r.Run(r.Services.GetAll(guid, "idx_host").Where(s => s.LastPingDate > date).OrderByDescending(s => s.LastPingDate)).ToList();
                 foreach (var item in services)
                 {
-                    info.Services.Add(item.ToServiceInfo());
+                    var srv = item.ToServiceInfo();
+                    srv.IsDisconnect = IsDisconnect(srv.LastPingDate);
+                    info.Services.Add(srv);
                 }
 
             }
@@ -155,7 +183,9 @@ namespace EsnServiceRegistry.Store
             var hosts = r.Run(r.Hosts.OrderByDescending("idx_date")).ToList();
             foreach (var item in hosts)
             {
-                list.Add(item.ToHostInfo());
+                var info = item.ToHostInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                list.Add(info);
             }
 
             return list;
@@ -169,7 +199,9 @@ namespace EsnServiceRegistry.Store
             var hosts = r.Run(r.Hosts.OrderByDescending("idx_date").Between(date, DateTime.UtcNow, "idx_date")).ToList();
             foreach (var item in hosts)
             {
-                list.Add(item.ToHostInfo());
+                var info = item.ToHostInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                list.Add(info);
             }
 
             return list;

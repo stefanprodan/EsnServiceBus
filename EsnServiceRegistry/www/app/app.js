@@ -1,7 +1,8 @@
 var esnApp = angular.module('esnApp', [
     'ngRoute',
     'siTable',
-    'mgcrea.ngStrap'
+    'mgcrea.ngStrap',
+    'angularMoment'
 ]);
 
 esnApp.filter('bytes', function () {
@@ -29,9 +30,17 @@ esnApp.config(['$routeProvider',
             templateUrl: 'partials/services.html',
             controller: 'ServicesCtrl'
         }).
+        when('/services/:serviceId', {
+            templateUrl: 'partials/service.html',
+            controller: 'ServiceCtrl'
+        }).
         when('/hosts', {
             templateUrl: 'partials/hosts.html',
             controller: 'HostsCtrl'
+        }).
+        when('/hosts/:hostId', {
+            templateUrl: 'partials/host.html',
+            controller: 'HostCtrl'
         }).
         otherwise({
             redirectTo: '/dashboard'
@@ -64,8 +73,20 @@ esnApp.controller('ServicesCtrl', function ($scope, $http) {
     }, function (err) {
         $scope.error = 'The server cannot be reached at the moment, please try again.';
     });
+});
 
-    
+esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+    var guid = $routeParams.serviceId;
+    var url = 'service/' + guid;
+    $http.get(url).then(function (service) {
+        $scope.service = service.data;
+    }, function (err) {
+        $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
 });
 
 esnApp.controller('HostsCtrl', function ($scope, $http) {
@@ -77,6 +98,20 @@ esnApp.controller('HostsCtrl', function ($scope, $http) {
     var url = 'registry/hosts';
     $http.get(url).then(function (hosts) {
         $scope.hosts = hosts.data;
+    }, function (err) {
+        $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
+});
+
+esnApp.controller('HostCtrl', function ($scope, $http, $routeParams) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+    var guid = $routeParams.hostId;
+    var url = 'host/' + guid;
+    $http.get(url).then(function (host) {
+        $scope.host = host.data;
     }, function (err) {
         $scope.error = 'The server cannot be reached at the moment, please try again.';
     });

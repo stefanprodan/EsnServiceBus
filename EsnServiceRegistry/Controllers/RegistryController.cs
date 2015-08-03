@@ -1,4 +1,5 @@
 ﻿using EsnCore.Registry;
+using EsnServiceRegistry.Attributes;
 using EsnServiceRegistry.Models;
 using EsnServiceRegistry.Store;
 using System;
@@ -12,6 +13,7 @@ using System.Web.Http;
 
 namespace EsnServiceRegistry.Controllers
 {
+    [NoCache]
     [RoutePrefix("registry")]
     public class RegistryController : ApiController
     {
@@ -22,7 +24,10 @@ namespace EsnServiceRegistry.Controllers
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
             var dash = new DashboardModel
             {
-                Registry = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) })
+                Registry = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo {
+                    Port = Convert.ToInt32(ServiceConfig.Reader.Port),
+                    Name = ServiceConfig.Reader.ServiceName,
+                })
             };
             dash.AmqpAdmin = ServiceConfig.Reader.AmqpAdmin;
             dash.RethinkAdmin = ServiceConfig.Reader.RethinkAdmin;

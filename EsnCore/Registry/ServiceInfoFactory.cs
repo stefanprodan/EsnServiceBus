@@ -48,6 +48,7 @@ namespace EsnCore.Registry
                 ms.Pid = proc.Id;
                 ms.Name = proc.ProcessName.Replace(".exe", string.Empty);
                 ms.StartDate = proc.StartTime.ToUniversalTime();
+                ms.CpuTime = proc.TotalProcessorTime;
             }
 
             if (ms.Port == 0)

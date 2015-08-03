@@ -22,17 +22,16 @@
             </tr>
         </thead>
         <tbody>
-            <tr si-sortable="single" ng-repeat="service in services | filter:filter as srvResults">
+            <tr si-sortable="single" ng-repeat="service in services | filter:filter">
                 <td>
-                    <strong><a href="{{ service.Id }}">{{ service.Name }}</a></strong><br />
-                    <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
-                    <span class="text-muted">Port:</span> {{ service.Port }}<br />
-                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
-                    <span class="text-muted">Guid:</span> {{ service.Guid }}<br />
-                    <span class="text-muted">Path:</span> {{ service.LocalPath }}
+                    <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
+                    <span class="text-muted">Online:</span> {{ service.IsDisconnect ? "No" : "Yes" }}<br />
+                    <span class="text-muted">Started:</span> <span am-time-ago="service.StartDate"></span><br />
+                    <span class="text-muted">CPU time:</span> {{ service.CpuTime }}<br />
+                    <span class="text-muted">Guid:</span> {{ service.Guid }}
                 </td>
                 <td>{{ service.MemoryUsage }}</td>
-                <td><a href="#/hosts">{{ service.HostName }}</a></td>
+                <td><a href="#/hosts/{{ service.HostGuid }}">{{ service.HostName }}</a></td>
                 <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
                 <td>
                     <span ng-repeat="label in service.Tags">

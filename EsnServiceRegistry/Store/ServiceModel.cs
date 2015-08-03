@@ -49,6 +49,9 @@ namespace EsnServiceRegistry.Store
         [JsonProperty("memory_usage")]
         public long MemoryUsage { get; set; }
 
+        [JsonProperty("cpu_time")]
+        public TimeSpan CpuTime { get; set; }
+
         [JsonProperty("local_path")]
         public string LocalPath { get; set; }
 
@@ -69,6 +72,7 @@ namespace EsnServiceRegistry.Store
             model.LastPingDate = info.LastPingDate;
             model.LocalPath = info.LocalPath;
             model.MemoryUsage = info.MemoryUsage;
+            model.CpuTime = info.CpuTime;
             model.Name = info.Name;
             model.Pid = info.Pid;
             model.Port = info.Port;
@@ -92,6 +96,7 @@ namespace EsnServiceRegistry.Store
             model.LastPingDate = this.LastPingDate;
             model.LocalPath = this.LocalPath;
             model.MemoryUsage = this.MemoryUsage;
+            model.CpuTime = this.CpuTime;
             model.Name = this.Name;
             model.Pid = this.Pid;
             model.Port = this.Port;

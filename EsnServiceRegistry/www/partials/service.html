@@ -1,0 +1,124 @@
+﻿<div>
+    <div class="row" ng-if="service">
+        <div class="col-md-6">
+            <h3>Service {{ service.Name }}</h3>
+        </div>
+    </div>
+    <hr />
+    <div class="row" ng-if="service">
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-hourglass-half fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ service.CpuTime | date: "HH:mm:ss" }}</div>
+                            <div>CPU time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-list fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ service.MemoryUsage }} MB</div>
+                            <div>Memory usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <table class="table table-striped" ng-if="service">
+        <caption>Service details</caption>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Service name</td>
+                <td>{{ service.Name }}</td>
+            </tr>
+            <tr>
+                <td>Online</td>
+                <td>{{ service.IsDisconnect ? "No" : "Yes" }}</td>
+            </tr>
+            <tr>
+                <td>Tags</td>
+                <td><span ng-repeat="tag in service.Tags">{{tag}}{{$last ? '' : ', '}}</span></td>
+            </tr>
+            <tr>
+                <td>Version</td>
+                <td>{{ service.Version }}</td>
+            </tr>
+            <tr>
+                <td>Build date</td>
+                <td>{{ service.BuildDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>Start date</td>
+                <td>{{ service.StartDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>Last active date</td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>Port</td>
+                <td>{{ service.Port }}</td>
+            </tr>
+            <tr>
+                <td>Pid</td>
+                <td>{{ service.Pid }}</td>
+            </tr>
+            <tr>
+                <td>Local path</td>
+                <td>{{ service.LocalPath }}</td>
+            </tr>
+            <tr>
+                <td>Host name</td>
+                <td><a href="#/hosts/{{ service.HostGuid }}">{{ service.Host.Name }}</a></td>
+            </tr>
+            <tr>
+                <td>Host OS</td>
+                <td>{{ service.Host.OSVersion }}</td>
+            </tr>
+            <tr>
+                <td>Host total memory</td>
+                <td>{{ service.Host.TotalMemory | bytes }}</td>
+            </tr>
+            <tr>
+                <td>Host free memory</td>
+                <td>{{ service.Host.FreeMemory | bytes }}</td>
+            </tr>
+            <tr>
+                <td>Host logical processors</td>
+                <td>{{ service.Host.CPUs }}</td>
+            </tr>
+            <tr>
+                <td>Host BIOS ID</td>
+                <td>{{ service.Host.Guid }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="alert alert-info" ng-if="!service && !error">
+        Loading ...
+    </div>
+
+    <div class="alert alert-danger" ng-if="error">
+        {{ error }}
+    </div>
+</div>
