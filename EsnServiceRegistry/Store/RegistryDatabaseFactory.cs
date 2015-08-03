@@ -53,11 +53,11 @@ namespace EsnServiceRegistry.Store
                 r.Run(r.Services.IndexWait("idx_guid"));
             }
 
-            //if (!servicesIdxList.Contains("idx_guid_date"))
-            //{
-            //    r.Run(r.Services.IndexCreate("idx_guid_date", i =>  i.Guid + i.LastPingDate, true));
-            //    r.Run(r.Services.IndexWait("idx_guid"));
-            //}
+            if (!servicesIdxList.Contains("idx_name"))
+            {
+                r.Run(r.Services.IndexCreate("idx_name", i => i.Name));
+                r.Run(r.Services.IndexWait("idx_name"));
+            }
 
             // hosts
             if (!tables.Contains("hosts"))

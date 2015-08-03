@@ -7,7 +7,7 @@
     <hr />
     <form class="form" ng-if="services">
         <div class="form-group">
-            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
+            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter services">
         </div>
     </form>
 
@@ -22,14 +22,14 @@
             </tr>
         </thead>
         <tbody>
-            <tr si-sortable="single" ng-repeat="service in services | filter:filter">
+            <tr si-sortable="single" ng-repeat="service in services | filter:filter" ng-class="{'warning' : service.IsDisconnect}">
                 <td>
                     <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
-                    <span class="text-muted">Disconnected:</span> {{ service.IsDisconnect ? "YES" : "NO" }}<br />
+                    <strong>{{ service.IsDisconnect ? "Offline" : "Online" }}</strong><br />
                     <span class="text-muted">CPU time:</span> {{ service.CpuTime | timespan: 3 }}<br />             
                     <span class="text-muted">Started:</span> <span am-time-ago="service.StartDate"></span><br />
                     <span class="text-muted">Last seen online:</span> <span am-time-ago="service.LastPingDate"></span><br />
-                    <span class="text-muted">Guid:</span> {{ service.Guid }}
+                    <span class="text-muted">Path:</span> {{ service.LocalPath }}
                 </td>
                 <td>{{ service.MemoryUsage }}</td>
                 <td><a href="#/hosts/{{ service.HostGuid }}">{{ service.HostName }}</a></td>

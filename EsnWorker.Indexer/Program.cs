@@ -1,10 +1,10 @@
-﻿using EsnWorker.Consumers;
-using EsnCore.Registry;
+﻿using EsnCore.Registry;
 using EsnCore.ServiceBus;
+using EsnWorker.Indexer.Consumers;
 using System;
 using System.Collections.Generic;
 
-namespace EsnWorker
+namespace EsnWorker.Indexer
 {
     class Program
     {
@@ -50,9 +50,9 @@ namespace EsnWorker
             foreach (var item in topics)
             {
                 var consumer = new TopicFactory(
-                    ConnectionConfig.GetFactoryDefault(RegistrySettings.Reader.AmqpUri), 
-                    new JsonMessageSerializer(), 
-                    new ConsoleLog(), 
+                    ConnectionConfig.GetFactoryDefault(RegistrySettings.Reader.AmqpUri),
+                    new JsonMessageSerializer(),
+                    new ConsoleLog(),
                     registryClient.ServiceDefinition.Version);
 
                 consumer.RetryMax = 10;
@@ -66,9 +66,9 @@ namespace EsnWorker
             for (int i = 0; i < workers; i++)
             {
                 var consumer = new FanoutFactory(
-                    ConnectionConfig.GetFactoryDefault(RegistrySettings.Reader.AmqpUri), 
-                    new JsonMessageSerializer(), 
-                    new ConsoleLog(), 
+                    ConnectionConfig.GetFactoryDefault(RegistrySettings.Reader.AmqpUri),
+                    new JsonMessageSerializer(),
+                    new ConsoleLog(),
                     registryClient.ServiceDefinition.Version);
 
                 consumer.StartConsumerInBackground<ServiceInfo>(new FanoutConsumer());

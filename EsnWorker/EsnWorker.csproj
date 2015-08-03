@@ -54,7 +54,6 @@
   <ItemGroup>
     <Compile Include="Consumers\FanoutConsumer.cs" />
     <Compile Include="Consumers\TopicConsumer.cs" />
-    <Compile Include="Helpers\ServiceConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

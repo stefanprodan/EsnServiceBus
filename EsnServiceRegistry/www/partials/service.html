@@ -84,7 +84,7 @@
                 <td>{{ service.Pid }}</td>
             </tr>
             <tr>
-                <td>Local path</td>
+                <td>Path</td>
                 <td>{{ service.LocalPath }}</td>
             </tr>
             <tr>
@@ -125,7 +125,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr si-sortable="single" ng-repeat="service in instances">
+            <tr si-sortable="single" ng-repeat="service in instances" ng-class="{'success': !service.IsDisconnect}">
                 <td>
                     <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
                     <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />

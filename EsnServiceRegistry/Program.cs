@@ -27,7 +27,7 @@ namespace EsnServiceRegistry
 
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
 
-            ServiceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RpcSettings.RegistryQueue, registryRepo.InsertOrUpdateService);
+            ServiceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, registryRepo.InsertOrUpdateService);
             ServiceRegistryServer.StartInBackground();
 
             var webServer = WebApp.Start<Startup>(url: ServiceConfig.Reader.GetBaseAddress());

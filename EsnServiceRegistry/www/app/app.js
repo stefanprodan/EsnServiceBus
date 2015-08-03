@@ -68,95 +68,148 @@ esnApp.config(['$routeProvider',
         });
   }]);
 
-esnApp.controller('DashboardCtrl', function ($scope, $http) {
+esnApp.controller('DashboardCtrl', function ($scope, $http, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-
+    var promise;
     var url = 'registry/dashboard';
-    $http.get(url).then(function (dashboard) {
-        $scope.info = dashboard.data;
-    }, function (err) {
-        $scope.error = 'The server cannot be reached at the moment, please try again.';
+
+    $scope.getData = function () {
+        $http.get(url).then(function (dashboard) {
+            $scope.info = dashboard.data;
+            $scope.error = null;
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, please try again.';
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
     });
+
 });
 
-esnApp.controller('ServicesCtrl', function ($scope, $http) {
+esnApp.controller('ServicesCtrl', function ($scope, $http, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-
+    var promise;
     var url = 'service';
-    $http.get(url).then(function (services) {
-        $scope.services = services.data;
-    }, function (err) {
-        $scope.error = 'The server cannot be reached at the moment, please try again.';
+
+    $scope.getData = function () {
+        $http.get(url).then(function (services) {
+            $scope.services = services.data;
+            $scope.error = null;
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, please try again.';
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
     });
 });
 
-esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams) {
+esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
     var guid = $routeParams.serviceId;
-
+    var promise;
     var url = 'service/' + guid;
-    $http.get(url).then(function (service) {
-        $scope.service = service.data;
-        if (!service.data) {
-            $scope.error = 'Service not found.';
-        }
-    }, function (err) {
-        $scope.error = 'The server cannot be reached at the moment, please try again.';
+    var urlIns = 'service/instances/' + guid;
+
+    $scope.getData = function () {
+        $http.get(url).then(function (service) {
+            $scope.service = service.data;
+            $scope.error = service.data ? null : 'Service not found.';
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, please try again.';
+        });
+
+        $http.get(urlIns).then(function (instances) {
+            $scope.instances = instances.data;
+        }, function (err) {
+
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
     });
 
-    var urlIns = 'service/instances/' + guid;
-    $http.get(urlIns).then(function (instances) {
-        $scope.instances = instances.data;
-    }, function (err) {
-       
-    });
 });
 
-esnApp.controller('HostsCtrl', function ($scope, $http) {
+esnApp.controller('HostsCtrl', function ($scope, $http, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-
+    var promise;
     var url = 'host';
-    $http.get(url).then(function (hosts) {
-        $scope.hosts = hosts.data;
-    }, function (err) {
-        $scope.error = 'The server cannot be reached at the moment, please try again.';
+
+    $scope.getData = function () {
+        $http.get(url).then(function (hosts) {
+            $scope.hosts = hosts.data;
+            $scope.error = null;
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, please try again.';
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
     });
+
 });
 
-esnApp.controller('HostCtrl', function ($scope, $http, $routeParams) {
+esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
     var guid = $routeParams.hostId;
-
+    var promise;
     var url = 'host/' + guid;
-    $http.get(url).then(function (host) {
-        $scope.host = host.data;
-        if (!host.data) {
-            $scope.error = 'Host not found.';
-        }
-    }, function (err) {
-        $scope.error = 'The server cannot be reached at the moment, please try again.';
-    });
-
     var urlSrvs = 'service/host/' + guid;
-    $http.get(urlSrvs).then(function (services) {
-        $scope.services = services.data;
-    }, function (err) {
 
+    $scope.getData = function () {
+        $http.get(url).then(function (host) {
+            $scope.host = host.data;
+            $scope.error = host.data ? null : 'Host not found.';
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, please try again.';
+        });
+
+
+        $http.get(urlSrvs).then(function (services) {
+            $scope.services = services.data;
+        }, function (err) {
+
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
     });
 });
 

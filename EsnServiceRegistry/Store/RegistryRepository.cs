@@ -37,7 +37,7 @@ namespace EsnServiceRegistry.Store
             if (service != null)
             {
                 info = service.ToServiceInfo();
-                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                info.IsDisconnect = (service.State != (int)ServiceState.Running) || IsDisconnect(info.LastPingDate);
                 var host = r.Run(r.Hosts.GetAll(info.HostGuid, "idx_guid").Limit(1)).FirstOrDefault();
                 if (host != null)
                 {
@@ -54,7 +54,7 @@ namespace EsnServiceRegistry.Store
             foreach (var item in services)
             {
                 var info = item.ToServiceInfo();
-                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                info.IsDisconnect = (item.State != (int)ServiceState.Running) || IsDisconnect(info.LastPingDate);
                 list.Add(info);
             }
 
@@ -70,7 +70,7 @@ namespace EsnServiceRegistry.Store
             foreach (var item in services)
             {
                 var info = item.ToServiceInfo();
-                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                info.IsDisconnect = (item.State != (int)ServiceState.Running) || IsDisconnect(info.LastPingDate);
                 list.Add(info);
             }
 
@@ -87,7 +87,7 @@ namespace EsnServiceRegistry.Store
             foreach (var item in services)
             {
                 var info = item.ToServiceInfo();
-                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                info.IsDisconnect = (item.State != (int)ServiceState.Running) || IsDisconnect(info.LastPingDate);
                 list.Add(info);
             }
 
@@ -169,19 +169,11 @@ namespace EsnServiceRegistry.Store
         {
             HostInfo info = null;
             var host = r.Run(r.Hosts.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
-            var running = (int)ServiceState.Running;
+
             if (host != null)
             {
                 info = host.ToHostInfo();
                 info.IsDisconnect = IsDisconnect(info.LastPingDate);
-                //var services = r.Run(r.Services.GetAll(guid, "idx_host").Where(s => s.State > running).OrderByDescending(s => s.LastPingDate)).ToList();
-                //foreach (var item in services)
-                //{
-                //    var srv = item.ToServiceInfo();
-                //    srv.IsDisconnect = IsDisconnect(srv.LastPingDate);
-                //    info.Services.Add(srv);
-                //}
-
             }
             return info;
         }

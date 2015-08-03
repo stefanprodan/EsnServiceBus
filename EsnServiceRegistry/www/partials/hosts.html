@@ -7,7 +7,7 @@
     <hr />
     <form class="form" ng-if="hosts">
         <div class="form-group">
-            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter">
+            <input type="text" class="form-control" ng-model="filter.$" placeholder="filter hosts">
         </div>
     </form>
 
@@ -22,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr si-sortable="single" ng-repeat="host in hosts | filter:filter">
+            <tr si-sortable="single" ng-repeat="host in hosts | filter:filter" ng-class="{'warning' : host.IsDisconnect}">
                 <td>
                     <strong><a href="#/hosts/{{ host.Guid }}">{{ host.Name }}</a></strong><br />
                     <span class="text-muted">Logical processors:</span> {{ host.CPUs }}<br />
