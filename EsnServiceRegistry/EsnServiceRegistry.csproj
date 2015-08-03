@@ -109,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NoCacheAttribute.cs" />
+    <Compile Include="Consumers\FanoutConsumer.cs" />
+    <Compile Include="Consumers\TopicConsumer.cs" />
     <Compile Include="Controllers\EmitController.cs" />
     <Compile Include="Controllers\HostController.cs" />
     <Compile Include="Controllers\ServiceController.cs" />

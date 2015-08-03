@@ -126,6 +126,19 @@ namespace EsnCore.Registry
         private void Sync()
         {
             var service = ServiceInfoFactory.CreateServiceDefinition(ServiceDefinition);
+            var topics = new TopicFactory(
+                ConnectionConfig.GetFactoryDefault(), 
+                new JsonMessageSerializer(), 
+                new ConsoleLog(), 
+                service.Version, 
+                RegistrySettings.RegistryStatsExchange);
+
+            topics.PublishMessage(service, new string[] { "status" });
+        }
+
+        private void RpcSync()
+        {
+            var service = ServiceInfoFactory.CreateServiceDefinition(ServiceDefinition);
 
             using (var connection = connectionFactory.CreateConnection())
             {
@@ -141,16 +154,19 @@ namespace EsnCore.Registry
                         try
                         {
                             var ok = consumer.Queue.Dequeue(Convert.ToInt32(timeout.TotalMilliseconds), out ea);
-                            if (!ok)
+                            if (ok)
+                            {
+                                if (ea.BasicProperties.CorrelationId == correlationId)
+                                {
+                                    var json = Encoding.UTF8.GetString(ea.Body);
+                                    ServiceDefinition = serializer.DeserializeObject<ServiceInfo>(ea.Body);
+                                }
+                            }
+                            else
                             {
                                 logger.Error($"RegistryClient.Sync has timeout after {timeout.TotalSeconds} seconds");
                             }
 
-                            if (ea.BasicProperties.CorrelationId == correlationId)
-                            {
-                                var json = Encoding.UTF8.GetString(ea.Body);
-                                ServiceDefinition = serializer.DeserializeObject<ServiceInfo>(ea.Body);
-                            }
                         }
                         catch (Exception ex)
                         {

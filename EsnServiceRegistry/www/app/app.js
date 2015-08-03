@@ -81,7 +81,7 @@ esnApp.controller('DashboardCtrl', function ($scope, $http, $interval) {
             $scope.info = dashboard.data;
             $scope.error = null;
         }, function (err) {
-            $scope.error = 'The server cannot be reached at the moment, please try again.';
+            $scope.error = 'The server cannot be reached at the moment, retying...';
         });
     }
 
@@ -107,7 +107,7 @@ esnApp.controller('ServicesCtrl', function ($scope, $http, $interval) {
             $scope.services = services.data;
             $scope.error = null;
         }, function (err) {
-            $scope.error = 'The server cannot be reached at the moment, please try again.';
+            $scope.error = 'The server cannot be reached at the moment, retying...';
         });
     }
 
@@ -134,7 +134,7 @@ esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interva
             $scope.service = service.data;
             $scope.error = service.data ? null : 'Service not found.';
         }, function (err) {
-            $scope.error = 'The server cannot be reached at the moment, please try again.';
+            $scope.error = 'The server cannot be reached at the moment, retying...';
         });
 
         $http.get(urlIns).then(function (instances) {
@@ -166,7 +166,7 @@ esnApp.controller('HostsCtrl', function ($scope, $http, $interval) {
             $scope.hosts = hosts.data;
             $scope.error = null;
         }, function (err) {
-            $scope.error = 'The server cannot be reached at the moment, please try again.';
+            $scope.error = 'The server cannot be reached at the moment, retying...';
         });
     }
 
@@ -194,7 +194,7 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $interval) 
             $scope.host = host.data;
             $scope.error = host.data ? null : 'Host not found.';
         }, function (err) {
-            $scope.error = 'The server cannot be reached at the moment, please try again.';
+            $scope.error = 'The server cannot be reached at the moment, retying...';
         });
 
 

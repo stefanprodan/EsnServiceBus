@@ -1,42 +1,51 @@
-﻿using EsnCore.Helpers;
-using EsnCore.Registry;
+﻿using EsnCore.Registry;
 using EsnCore.ServiceBus;
 using Microsoft.Owin.Hosting;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using EsnServiceRegistry.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EsnServiceRegistry.Store;
+using EsnServiceRegistry.Consumers;
 
 namespace EsnServiceRegistry
 {
     class Program
     {
-        internal static ServiceInfo ServiceStatus;
-        internal static RpcServer<ServiceInfo> ServiceRegistryServer;
+        private static ServiceInfo serviceDefinition;
+        private static RpcServer<ServiceInfo> serviceRegistryServer;
 
         static void Main(string[] args)
         {
-            ServiceStatus = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
+            serviceDefinition = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
 
-            ServiceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, registryRepo.InsertOrUpdateService);
-            ServiceRegistryServer.StartInBackground();
+            serviceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, registryRepo.InsertOrUpdateService);
+            serviceRegistryServer.StartInBackground();
+            var statsConsumer = StartStatsConsumer();
 
             var webServer = WebApp.Start<Startup>(url: ServiceConfig.Reader.GetBaseAddress());
 
             Console.WriteLine("Service Registry Server started");
             Console.ReadLine();
 
-            ServiceRegistryServer.Stop();
+            statsConsumer.StopConsumer();
+            serviceRegistryServer.Stop();
             webServer.Dispose();
+        }
+
+        static TopicFactory StartStatsConsumer()
+        {
+            var consumer = new TopicFactory(
+                ConnectionConfig.GetFactoryDefault(RegistrySettings.Reader.AmqpUri),
+                new JsonMessageSerializer(),
+                new ConsoleLog(),
+                serviceDefinition.Version,
+                RegistrySettings.RegistryStatsExchange);
+
+            consumer.RetryMax = 10;
+            consumer.StartConsumerInBackground("status", new StatsConsumer());
+
+            return consumer;
         }
     }
 }

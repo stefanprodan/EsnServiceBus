@@ -1,4 +1,5 @@
-﻿using EsnCore.ServiceBus;
+﻿using EsnCore.Registry;
+using EsnCore.ServiceBus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace EsnWorker.Indexer.Consumers
 {
-    public class FanoutConsumer : IConsumer
+    public class FanoutConsumer : IConsumer<ServiceInfo>
     {
-        public void ProcessMessage<T>(T message)
+        public void ProcessMessage(ServiceInfo message)
         {
             //var ex = new ConsumerException("Database server is unreachable", new TimeoutException());
             //ex.IsRetryable = false;

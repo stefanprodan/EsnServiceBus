@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EsnWorker.Consumers
+namespace EsnServiceRegistry.Consumers
 {
     public class FanoutConsumer : IConsumer<ServiceInfo>
     {

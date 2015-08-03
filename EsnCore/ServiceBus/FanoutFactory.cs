@@ -73,7 +73,7 @@ namespace EsnCore.ServiceBus
             return consumer;
         }
 
-        public void StartConsumer<T>(IConsumer fanoutConsumer)
+        public void StartConsumer<T>(IConsumer<T> fanoutConsumer)
         {
             var exitArgs = new ConsumerExitEventArgs();
             using (consumerConnection = amqpConnectionFactory.CreateConnection())
@@ -190,7 +190,7 @@ namespace EsnCore.ServiceBus
             }
         }
 
-        public void StartConsumerInBackground<T>(IConsumer fanoutConsumer)
+        public void StartConsumerInBackground<T>(IConsumer<T> fanoutConsumer)
         {
             var backgroundThread = new Thread(t =>
             {

@@ -1,20 +1,29 @@
 ﻿using EsnCore.Registry;
 using EsnCore.ServiceBus;
+using EsnServiceRegistry.Store;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EsnWorker.Consumers
+namespace EsnServiceRegistry.Consumers
 {
-    public class FanoutConsumer : IConsumer<ServiceInfo>
+    public class StatsConsumer : IConsumer<ServiceInfo>
     {
-        public void ProcessMessage(ServiceInfo message)
+        public void ProcessMessage(ServiceInfo service)
         {
-            //var ex = new ConsumerException("Database server is unreachable", new TimeoutException());
-            //ex.IsRetryable = false;
-            //throw ex;
+            try
+            {
+                var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+                registryRepo.InsertOrUpdateService(service);
+            }
+            catch (Exception ex)
+            {
+                var exe = new ConsumerException("Database error", ex);
+                exe.IsRetryable = true;
+                throw exe;
+            }
         }
 
         public void OnConsumerExit(ConsumerExitEventArgs args)

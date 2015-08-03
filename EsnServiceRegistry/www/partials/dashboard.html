@@ -1,7 +1,12 @@
 ﻿<div>
+
+    <div class="alert alert-danger" ng-if="error">
+        <i class="fa fa-spinner fa-pulse"></i> {{ error }}
+    </div>
+
     <div class="row">
         <div class="col-lg-6 col-md-6">
-            <div class="panel panel-danger">
+            <div class="panel panel-success">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -69,7 +74,7 @@
             </div>
         </div>
         <div class="col-lg-6 col-md-6">
-            <div class="panel panel-warning">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -92,69 +97,71 @@
         </div>
     </div>
 
+    <table class="table table-striped" ng-if="info">
+        <caption>Service Registry Server details</caption>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Service name</td>
+                <td>{{ info.Registry.Name }}</td>
+            </tr>
+            <tr>
+                <td>Version</td>
+                <td>{{ info.Registry.Version }}</td>
+            </tr>
+            <tr>
+                <td>Build date</td>
+                <td>{{ info.Registry.BuildDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>Start date</td>
+                <td>{{ info.Registry.StartDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>Pid</td>
+                <td>{{ info.Registry.Pid }}</td>
+            </tr>
+            <tr>
+                <td>Local path</td>
+                <td>{{ info.Registry.LocalPath }}</td>
+            </tr>
+            <tr>
+                <td>Memory usage</td>
+                <td>{{ info.Registry.MemoryUsage }} MB</td>
+            </tr>
+            <tr>
+                <td>Host name</td>
+                <td>{{ info.Registry.Host.Name }}</td>
+            </tr>
+            <tr>
+                <td>Host OS</td>
+                <td>{{ info.Registry.Host.OSVersion }}</td>
+            </tr>
+            <tr>
+                <td>Host total memory</td>
+                <td>{{ info.Registry.Host.TotalMemory | bytes }}</td>
+            </tr>
+            <tr>
+                <td>Host free memory</td>
+                <td>{{ info.Registry.Host.FreeMemory | bytes }}</td>
+            </tr>
+            <tr>
+                <td>Host logical processors</td>
+                <td>{{ info.Registry.Host.CPUs }}</td>
+            </tr>
+            <tr>
+                <td>Host BIOS ID</td>
+                <td>{{ info.Registry.Host.Guid }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <table class="table table-striped">
-            <caption>Service Registry Server details</caption>
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Service name</td>
-                    <td>{{ info.Registry.Name }}</td>
-                </tr>
-                <tr>
-                    <td>Version</td>
-                    <td>{{ info.Registry.Version }}</td>
-                </tr>
-                <tr>
-                    <td>Build date</td>
-                    <td>{{ info.Registry.BuildDate | date: "dd/MM/yy H:mm:ss"}}</td>
-                </tr>
-                <tr>
-                    <td>Start date</td>
-                    <td>{{ info.Registry.StartDate | date: "dd/MM/yy H:mm:ss"}}</td>
-                </tr>
-                <tr>
-                    <td>Pid</td>
-                    <td>{{ info.Registry.Pid }}</td>
-                </tr>
-                <tr>
-                    <td>Local path</td>
-                    <td>{{ info.Registry.LocalPath }}</td>
-                </tr>
-                <tr>
-                    <td>Memory usage</td>
-                    <td>{{ info.Registry.MemoryUsage }} MB</td>
-                </tr>
-                <tr>
-                    <td>Host name</td>
-                    <td>{{ info.Registry.Host.Name }}</td>
-                </tr>
-                <tr>
-                    <td>Host OS</td>
-                    <td>{{ info.Registry.Host.OSVersion }}</td>
-                </tr>
-                <tr>
-                    <td>Host total memory</td>
-                    <td>{{ info.Registry.Host.TotalMemory | bytes }}</td>
-                </tr>
-                <tr>
-                    <td>Host free memory</td>
-                    <td>{{ info.Registry.Host.FreeMemory | bytes }}</td>
-                </tr>
-                <tr>
-                    <td>Host logical processors</td>
-                    <td>{{ info.Registry.Host.CPUs }}</td>
-                </tr>
-                <tr>
-                    <td>Host BIOS ID</td>
-                    <td>{{ info.Registry.Host.Guid }}</td>
-                </tr>
-            </tbody>
-        </table>
-
+    <div class="alert alert-info" ng-if="!info && !error">
+        <i class="fa fa-spinner fa-pulse"></i> Loading ...
+    </div>
 </div>

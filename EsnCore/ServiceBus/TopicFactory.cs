@@ -95,7 +95,7 @@ namespace EsnCore.ServiceBus
         /// </summary>
         /// <typeparam name="T">message type</typeparam>
         /// <param name="topic">topic name</param>
-        public void StartConsumer<T>(string topic, IConsumer topicConsumer)
+        public void StartConsumer<T>(string topic, IConsumer<T> topicConsumer)
         {
             var exitArgs = new ConsumerExitEventArgs();
             using (consumerConnection = amqpConnectionFactory.CreateConnection())
@@ -232,7 +232,7 @@ namespace EsnCore.ServiceBus
             }
         }
 
-        public void StartConsumerInBackground<T>(string topic, IConsumer topicConsumer)
+        public void StartConsumerInBackground<T>(string topic, IConsumer<T> topicConsumer)
         {
             var backgroundThread = new Thread(t =>
             {

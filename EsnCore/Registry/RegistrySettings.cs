@@ -10,6 +10,7 @@ namespace EsnCore.Registry
     public class RegistrySettings
     {
         public static string RegistryQueue = "esn.registry.rpc";
+        public static string RegistryStatsExchange = "esn.stats";
 
         public static readonly RegistrySettings Reader = new RegistrySettings();
 

@@ -19,7 +19,7 @@ namespace EsnWorker.Indexer
                 serializer: new JsonMessageSerializer(),
                 logger: new ConsoleLog(),
                 syncInterval: TimeSpan.FromSeconds(30),
-                timeout: TimeSpan.FromSeconds(10));
+                timeout: TimeSpan.FromSeconds(25));
 
             var serviceDefinition = ServiceInfoFactory.LoadFromDisk(RegistrySettings.Reader.ServiceName);
             serviceDefinition = ServiceInfoFactory.CreateServiceDefinition(serviceDefinition);
