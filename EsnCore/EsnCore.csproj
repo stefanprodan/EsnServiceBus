@@ -59,7 +59,7 @@
     <Compile Include="Registry\ServiceState.cs" />
     <Compile Include="Registry\RpcClient.cs" />
     <Compile Include="Registry\RpcServer.cs" />
-    <Compile Include="Registry\RpcSettings.cs" />
+    <Compile Include="Registry\RegistrySettings.cs" />
     <Compile Include="ServiceBus\ConnectionConfig.cs" />
     <Compile Include="ServiceBus\ConsoleLog.cs" />
     <Compile Include="ServiceBus\ConsumerException.cs" />

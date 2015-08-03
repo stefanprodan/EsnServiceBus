@@ -47,9 +47,9 @@ namespace EsnCore.Registry
 
             var messageBytes = serializer.SerializeObject(service);
 
-            channel.QueueDeclare(queue: RpcSettings.RegistryQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueDeclare(queue: RegistrySettings.RegistryQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
-            channel.BasicPublish("", RpcSettings.RegistryQueue, props, messageBytes);
+            channel.BasicPublish("", RegistrySettings.RegistryQueue, props, messageBytes);
 
             return consumer;
         }

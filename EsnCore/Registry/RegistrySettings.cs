@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EsnWorker.Helpers
+namespace EsnCore.Registry
 {
-    public class ServiceConfig
+    public class RegistrySettings
     {
-        public static readonly ServiceConfig Reader = new ServiceConfig();
+        public static string RegistryQueue = "esn.registry.rpc";
+
+        public static readonly RegistrySettings Reader = new RegistrySettings();
 
         public string ServiceName
         {
@@ -26,7 +28,7 @@ namespace EsnWorker.Helpers
             {
                 return ReadString("AmqpUri");
             }
-        }    
+        }
 
         private static string ReadString(string key)
         {
