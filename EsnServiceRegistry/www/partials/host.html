@@ -83,8 +83,8 @@
     </table>
     <hr />
 
-    <table class="table" ng-if="host" si-table>
-        <caption>Active services in the last hour</caption>
+    <table class="table" ng-if="services" si-table>
+        <caption>Running services</caption>
         <thead>
             <tr>
                 <th sort-by="Name">Service</th>
@@ -94,7 +94,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr si-sortable="single" ng-repeat="service in host.Services | filter:filter">
+            <tr si-sortable="single" ng-repeat="service in services">
                 <td>
                     <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
                     <span class="text-muted">Pid:</span> {{ service.Pid }}<br />

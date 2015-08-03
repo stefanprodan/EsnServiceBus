@@ -8,6 +8,7 @@ namespace EsnServiceRegistry.Store
 {
     public abstract class BaseRepository
     {
+        public int Limit = 1000;
         public int DisconnectTimeout { get; set; } = 2;
 
         internal protected RegistryConnection r;

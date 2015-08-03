@@ -10,26 +10,34 @@ namespace EsnWorker
 {
     class Program
     {
-        internal static ServiceInfo InstanceInfo;
-        internal static List<TopicFactory> TopicConsumers = new List<TopicFactory>();
-        internal static List<FanoutFactory> PubSubConsumers = new List<FanoutFactory>();
+        private static RegistryClient registryClient;
+        private static List<TopicFactory> topicConsumers = new List<TopicFactory>();
+        private static List<FanoutFactory> pubSubConsumers = new List<FanoutFactory>();
+
         static void Main(string[] args)
         {
-            var rpc = new RpcClient(ConnectionConfig.GetFactoryDefault(ServiceConfig.Reader.AmqpUri), RpcSettings.RegistryQueue);
+            registryClient = new RegistryClient(
+                connectionFactory: ConnectionConfig.GetFactoryDefault(ServiceConfig.Reader.AmqpUri),
+                serializer: new JsonMessageSerializer(),
+                logger: new ConsoleLog(),
+                syncInterval: TimeSpan.FromSeconds(30),
+                timeout: TimeSpan.FromSeconds(10));
 
-            var info = ServiceInfoFactory.CreateServiceDefinition();
-            info.Name = ServiceConfig.Reader.ServiceName;
+            var serviceDefinition = ServiceInfoFactory.LoadFromDisk(ServiceConfig.Reader.ServiceName);
+            serviceDefinition = ServiceInfoFactory.CreateServiceDefinition(serviceDefinition);
+            serviceDefinition.Name = ServiceConfig.Reader.ServiceName;
 
-            var response = rpc.Sync(info, TimeSpan.FromSeconds(60));
+            var response = registryClient.Register(serviceDefinition);
             if (response != null)
             {
-                InstanceInfo = response;
+                ServiceInfoFactory.SaveToDisk(response);
+
                 Console.WriteLine($"Service registry provided ID {response.Guid}");
 
                 StartTopicWorkers(Topics.Text, Topics.Url, Topics.Images, Topics.Video);
                 StartPubSubWorkers(2);
-                StartPringThread(rpc);
 
+                registryClient.SyncInBackground();
             }
             else
             {
@@ -39,31 +47,19 @@ namespace EsnWorker
             Console.ReadLine();
         }
 
-        static void StartPringThread(RpcClient rpc)
-        {
-            var th = new Thread(t =>
-            {
-                while (true)
-                {
-                    var info = ServiceInfoFactory.CreateServiceDefinition(InstanceInfo);
-                    info.Name = ServiceConfig.Reader.ServiceName;
-                    rpc.Sync(info, TimeSpan.FromSeconds(60));
-
-                    Thread.Sleep(1000);
-                }
-            });
-            th.IsBackground = true;
-            th.Start();
-        }
-
         static void StartTopicWorkers(params string[] topics)
         {
             foreach (var item in topics)
             {
-                var consumer = new TopicFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), InstanceInfo.Version);
+                var consumer = new TopicFactory(
+                    ConnectionConfig.GetFactoryDefault(ServiceConfig.Reader.AmqpUri), 
+                    new JsonMessageSerializer(), 
+                    new ConsoleLog(), 
+                    registryClient.ServiceDefinition.Version);
+
                 consumer.RetryMax = 10;
                 consumer.StartConsumerInBackground<ServiceInfo>(item, new TopicConsumer());
-                TopicConsumers.Add(consumer);
+                topicConsumers.Add(consumer);
             }
         }
 
@@ -71,9 +67,14 @@ namespace EsnWorker
         {
             for (int i = 0; i < workers; i++)
             {
-                var consumer = new FanoutFactory(ConnectionConfig.GetFactoryDefault(), new JsonMessageSerializer(), new ConsoleLog(), InstanceInfo.Version);
+                var consumer = new FanoutFactory(
+                    ConnectionConfig.GetFactoryDefault(ServiceConfig.Reader.AmqpUri), 
+                    new JsonMessageSerializer(), 
+                    new ConsoleLog(), 
+                    registryClient.ServiceDefinition.Version);
+
                 consumer.StartConsumerInBackground<ServiceInfo>(new FanoutConsumer());
-                PubSubConsumers.Add(consumer);
+                pubSubConsumers.Add(consumer);
             }
         }
 

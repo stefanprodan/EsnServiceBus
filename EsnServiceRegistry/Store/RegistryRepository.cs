@@ -10,8 +10,6 @@ namespace EsnServiceRegistry.Store
 {
     public class RegistryRepository : BaseRepository
     {
-        
-
         public RegistryRepository(RegistryDatabaseFactory databaseFactory)
             : base(databaseFactory)
         {
@@ -19,19 +17,17 @@ namespace EsnServiceRegistry.Store
 
         #region Services
 
-        public void GetTotals(out int services, out int hosts, int activeMinutesAgo = 1000)
+        public void GetTotals(out int services, out int hosts)
         {
             services = 0;
             hosts = 0;
 
-            var date = DateTime.UtcNow.AddMinutes((-1) * activeMinutesAgo);
+            var date = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
             var running = (int)ServiceState.Running;
             services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").Where(s => s.State == running)).Count();
             hosts = r.Run(r.Hosts.Between(date, DateTime.UtcNow, "idx_date")).Count();
 
         }
-
-        
 
         public ServiceInfo GetService(string guid)
         {
@@ -49,6 +45,20 @@ namespace EsnServiceRegistry.Store
                 }
             }
             return info;
+        }
+
+        public List<ServiceInfo> GetServiceInstances(string guid)
+        {
+            var list = new List<ServiceInfo>();
+            var services = r.Run(r.Services.GetAll(guid, "idx_guid").Limit(Limit).OrderByDescending(s => s.LastPingDate)).ToList();
+            foreach (var item in services)
+            {
+                var info = item.ToServiceInfo();
+                info.IsDisconnect = IsDisconnect(info.LastPingDate);
+                list.Add(info);
+            }
+
+            return list;
         }
 
         public List<ServiceInfo> AllServices(ServiceState status)
@@ -117,8 +127,9 @@ namespace EsnServiceRegistry.Store
                 }
 
                 // insert new if pid changed
-                if (info.Pid != model.Pid)
+                if (info.Pid != service.Pid)
                 {
+                    model.Id = null;
                     model.RegisterDate = DateTime.UtcNow;
 
                     var response = r.Run(r.Services.Insert(model));
@@ -154,26 +165,40 @@ namespace EsnServiceRegistry.Store
 
         #region Hosts
 
-        public HostInfo GetHost(string guid, int serviceActiveMinutesAgo)
+        public HostInfo GetHost(string guid)
         {
             HostInfo info = null;
             var host = r.Run(r.Hosts.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
-
+            var running = (int)ServiceState.Running;
             if (host != null)
             {
                 info = host.ToHostInfo();
                 info.IsDisconnect = IsDisconnect(info.LastPingDate);
-                var date = DateTime.UtcNow.AddMinutes((-1) * serviceActiveMinutesAgo);
-                var services = r.Run(r.Services.GetAll(guid, "idx_host").Where(s => s.LastPingDate > date).OrderByDescending(s => s.LastPingDate)).ToList();
-                foreach (var item in services)
-                {
-                    var srv = item.ToServiceInfo();
-                    srv.IsDisconnect = IsDisconnect(srv.LastPingDate);
-                    info.Services.Add(srv);
-                }
+                //var services = r.Run(r.Services.GetAll(guid, "idx_host").Where(s => s.State > running).OrderByDescending(s => s.LastPingDate)).ToList();
+                //foreach (var item in services)
+                //{
+                //    var srv = item.ToServiceInfo();
+                //    srv.IsDisconnect = IsDisconnect(srv.LastPingDate);
+                //    info.Services.Add(srv);
+                //}
 
             }
             return info;
+        }
+
+        public List<ServiceInfo> AllHostServices(string guid)
+        {
+            var list = new List<ServiceInfo>();
+            var running = (int)ServiceState.Running;
+            var services = r.Run(r.Services.GetAll(guid, "idx_host").Where(s => s.State == running).OrderByDescending(s => s.LastPingDate)).ToList();
+            foreach (var item in services)
+            {
+                var srv = item.ToServiceInfo();
+                srv.IsDisconnect = IsDisconnect(srv.LastPingDate);
+                list.Add(srv);
+            }
+
+            return list;
         }
 
         public List<HostInfo> AllHosts()

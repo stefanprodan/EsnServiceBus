@@ -14,7 +14,7 @@
                             <i class="fa fa-hourglass-half fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div style="font-size:40px">{{ service.CpuTime | date: "HH:mm:ss" }}</div>
+                            <div style="font-size:40px">{{ service.CpuTime | timespan: 3 }}</div>
                             <div>CPU time</div>
                         </div>
                     </div>
@@ -112,6 +112,36 @@
                 <td>{{ service.Host.Guid }}</td>
             </tr>
         </tbody>
+    </table>
+
+    <table class="table" ng-if="instances" si-table>
+        <caption>Instances history</caption>
+        <thead>
+            <tr>
+                <th>Instance</th>
+                <th sort-by="CpuTime">CPU Time</th>
+                <th sort-by="MemoryUsage">Memory (MB)</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in instances">
+                <td>
+                    <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
+                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
+                </td>
+                <td>{{ service.CpuTime | timespan: 3 }}</td>
+                <td>{{ service.MemoryUsage }}</td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
     </table>
 
     <div class="alert alert-info" ng-if="!service && !error">

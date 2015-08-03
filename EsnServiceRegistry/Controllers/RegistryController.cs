@@ -38,30 +38,6 @@ namespace EsnServiceRegistry.Controllers
             return dash;
         }
 
-        [Route("hosts")]
-        [HttpGet]
-        public List<HostInfo> GetHosts()
-        {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllHosts();
-        }
-
-        [Route("running")]
-        [HttpGet]
-        public List<ServiceInfo> GetServices()
-        {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllServices(ServiceState.Running);
-        }
-
-        [Route("active")]
-        [HttpGet]
-        public List<ServiceInfo> GetActiveServices()
-        {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllActiveServices(1);
-        }
-
         [Route("ping")]
         [HttpGet]
         public HttpResponseMessage Ping()
@@ -71,13 +47,6 @@ namespace EsnServiceRegistry.Controllers
             var resp = new HttpResponseMessage(HttpStatusCode.OK);
             resp.Content = new StringContent(stringResponse, Encoding.UTF8, "text/plain");
             return resp;
-        }
-
-        [Route("status")]
-        [HttpGet]
-        public ServiceInfo Status()
-        {
-            return ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
         }
     }
 }

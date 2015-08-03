@@ -17,14 +17,20 @@ namespace EsnServiceRegistry.Controllers
     [RoutePrefix("host")]
     public class HostController : ApiController
     {
+        [Route]
+        [HttpGet]
+        public List<HostInfo> GetAll()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllHosts();
+        }
+
         [Route("{guid}")]
         [HttpGet]
         public HostInfo Get(string guid)
         {
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetHost(guid, 60);
+            return registryRepo.GetHost(guid);
         }
-
-
     }
 }

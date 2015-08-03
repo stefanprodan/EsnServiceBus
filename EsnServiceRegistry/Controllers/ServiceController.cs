@@ -17,6 +17,14 @@ namespace EsnServiceRegistry.Controllers
     [RoutePrefix("service")]
     public class ServiceController : ApiController
     {
+        [Route]
+        [HttpGet]
+        public List<ServiceInfo> GetAll()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllServices(ServiceState.Running);
+        }
+
         [Route("{guid}")]
         [HttpGet]
         public ServiceInfo Get(string guid)
@@ -25,6 +33,21 @@ namespace EsnServiceRegistry.Controllers
             return registryRepo.GetService(guid);
         }
 
+        [Route("instances/{guid}")]
+        [HttpGet]
+        public List<ServiceInfo> GetInstances(string guid)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.GetServiceInstances(guid);
+        }
+
+        [Route("host/{guid}")]
+        [HttpGet]
+        public List<ServiceInfo> GetHostServices(string guid)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllHostServices(guid);
+        }
 
     }
 }

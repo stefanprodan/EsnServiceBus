@@ -5,6 +5,7 @@ using Owin;
 using System.Web.Http;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
+using Microsoft.Owin.Cors;
 
 [assembly: OwinStartup(typeof(EsnServiceRegistry.Startup))]
 
@@ -26,6 +27,7 @@ namespace EsnServiceRegistry
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            app.UseCors(CorsOptions.AllowAll);
             app.UseWebApi(config);
 
             // Configure Web API for static files

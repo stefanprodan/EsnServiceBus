@@ -50,7 +50,7 @@ namespace EsnServiceRegistry.Store
         public long MemoryUsage { get; set; }
 
         [JsonProperty("cpu_time")]
-        public TimeSpan CpuTime { get; set; }
+        public double CpuTime { get; set; }
 
         [JsonProperty("local_path")]
         public string LocalPath { get; set; }

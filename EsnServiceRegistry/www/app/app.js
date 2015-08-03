@@ -19,6 +19,27 @@ esnApp.filter('bytes', function () {
     }
 });
 
+// usage: {{ elapsedSeconds | timespan }} displays: 01:23:45
+// usage: {{ elapsedSeconds | timespan : 3 }} displays: 01:23:45.678
+esnApp.filter('timespan', ['$filter', function ($filter) {
+    return function (input, decimals) {
+        var sec_num = parseInt(input, 10),
+            decimal = parseFloat(input) - sec_num,
+            hours = Math.floor(sec_num / 3600),
+            minutes = Math.floor((sec_num - (hours * 3600)) / 60),
+            seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (hours < 10) { hours = "0" + hours; }
+        if (minutes < 10) { minutes = "0" + minutes; }
+        if (seconds < 10) { seconds = "0" + seconds; }
+        var time = hours + ':' + minutes + ':' + seconds;
+        if (decimals > 0) {
+            time += '.' + $filter('number')(decimal, decimals).substr(2);
+        }
+        return time;
+    };
+}]);
+
 esnApp.config(['$routeProvider',
   function ($routeProvider) {
       $routeProvider.
@@ -67,7 +88,7 @@ esnApp.controller('ServicesCtrl', function ($scope, $http) {
     };
     $scope.params = {};
 
-    var url = 'registry/running';
+    var url = 'service';
     $http.get(url).then(function (services) {
         $scope.services = services.data;
     }, function (err) {
@@ -81,11 +102,22 @@ esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams) {
     };
     $scope.params = {};
     var guid = $routeParams.serviceId;
+
     var url = 'service/' + guid;
     $http.get(url).then(function (service) {
         $scope.service = service.data;
+        if (!service.data) {
+            $scope.error = 'Service not found.';
+        }
     }, function (err) {
         $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
+
+    var urlIns = 'service/instances/' + guid;
+    $http.get(urlIns).then(function (instances) {
+        $scope.instances = instances.data;
+    }, function (err) {
+       
     });
 });
 
@@ -95,7 +127,7 @@ esnApp.controller('HostsCtrl', function ($scope, $http) {
     };
     $scope.params = {};
 
-    var url = 'registry/hosts';
+    var url = 'host';
     $http.get(url).then(function (hosts) {
         $scope.hosts = hosts.data;
     }, function (err) {
@@ -109,11 +141,22 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams) {
     };
     $scope.params = {};
     var guid = $routeParams.hostId;
+
     var url = 'host/' + guid;
     $http.get(url).then(function (host) {
         $scope.host = host.data;
+        if (!host.data) {
+            $scope.error = 'Host not found.';
+        }
     }, function (err) {
         $scope.error = 'The server cannot be reached at the moment, please try again.';
+    });
+
+    var urlSrvs = 'service/host/' + guid;
+    $http.get(urlSrvs).then(function (services) {
+        $scope.services = services.data;
+    }, function (err) {
+
     });
 });
 
