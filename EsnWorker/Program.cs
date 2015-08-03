@@ -4,6 +4,7 @@ using EsnCore.ServiceBus;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using EsnWorker.Helpers;
 
 namespace EsnWorker
 {
@@ -14,9 +15,10 @@ namespace EsnWorker
         internal static List<FanoutFactory> PubSubConsumers = new List<FanoutFactory>();
         static void Main(string[] args)
         {
-            var rpc = new RpcClient(ConnectionConfig.GetFactoryDefault(), RpcSettings.RegistryQueue);
+            var rpc = new RpcClient(ConnectionConfig.GetFactoryDefault(ServiceConfig.Reader.AmqpUri), RpcSettings.RegistryQueue);
 
             var info = ServiceInfoFactory.CreateServiceDefinition();
+            info.Name = ServiceConfig.Reader.ServiceName;
 
             var response = rpc.Sync(info, TimeSpan.FromSeconds(60));
             if (response != null)
@@ -44,6 +46,7 @@ namespace EsnWorker
                 while (true)
                 {
                     var info = ServiceInfoFactory.CreateServiceDefinition(InstanceInfo);
+                    info.Name = ServiceConfig.Reader.ServiceName;
                     rpc.Sync(info, TimeSpan.FromSeconds(60));
 
                     Thread.Sleep(1000);
