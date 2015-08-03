@@ -65,7 +65,7 @@ namespace EsnCore.Registry
                                 var inObj = JsonConvert.DeserializeObject<T>(message);
                                 var outObj = messageProcess(inObj);
 
-                                Console.WriteLine($"Message received from service");
+                                Console.WriteLine($"Register request received from service");
 
                                 response = JsonConvert.SerializeObject(outObj);
                             }

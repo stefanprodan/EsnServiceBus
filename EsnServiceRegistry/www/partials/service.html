@@ -10,8 +10,23 @@
     </div>
     <hr />
     <div class="row" ng-if="service">
-        <div class="col-lg-6 col-md-6">
-            <div class="panel panel-danger">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-sitemap fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ cluster.length }}</div>
+                            <div>Cluster size</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -25,8 +40,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="panel panel-success">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-warning">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -133,6 +148,38 @@
                 <td>
                     <span class="text-muted">Pid:</span> {{ service.Pid }}<br />
                     <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}<br />
+                </td>
+                <td>{{ service.CpuTime | timespan: 3 }}</td>
+                <td>{{ service.MemoryUsage }}</td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <table class="table" ng-if="cluster" si-table>
+        <caption>Cluster</caption>
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th sort-by="CpuTime">CPU Time</th>
+                <th sort-by="MemoryUsage">Memory (MB)</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in cluster" ng-class="{'warning' : service.IsDisconnect}">
+                <td>
+                    <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
+                    <strong>{{ service.IsDisconnect ? "Offline" : "Online" }}</strong><br />
+                    <span class="text-muted">Host:</span> <a href="#/hosts/{{ service.HostGuid }}">{{ service.HostName }}</a><br />
+                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}
                 </td>
                 <td>{{ service.CpuTime | timespan: 3 }}</td>
                 <td>{{ service.MemoryUsage }}</td>

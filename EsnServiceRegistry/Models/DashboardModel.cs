@@ -13,6 +13,7 @@ namespace EsnServiceRegistry.Models
         public string RethinkAdmin { get; set; }
         public int ServicesCount { get; set; }
         public int HostsCount { get; set; }
+        public int IssuesCount { get; set; }
         public ServiceInfo Registry { get; set; }
     }
 }

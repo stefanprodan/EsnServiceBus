@@ -19,7 +19,7 @@
         <thead>
             <tr>
                 <th sort-by="Name">Host</th>
-                <th sort-by="Location">Location</th>
+                <th sort-by="ServicesCount">Services</th>
                 <th sort-by="FreeMemory">Free RAM</th>
                 <th sort-by="LastPingDate" sort-init="desc">Last active</th>
                 <th>Tags</th>
@@ -29,13 +29,13 @@
             <tr si-sortable="single" ng-repeat="host in hosts | filter:filter" ng-class="{'warning' : host.IsDisconnect}">
                 <td>
                     <strong><a href="#/hosts/{{ host.Guid }}">{{ host.Name }}</a></strong><br />
+                    <span class="text-muted">Location:</span> {{ host.Location?(host.Location):"Not set" }}<br />
                     <span class="text-muted">Logical processors:</span> {{ host.CPUs }}<br />
                     <span class="text-muted">Total memory:</span> {{ host.TotalMemory | bytes }}<br />
                     <span class="text-muted">Used memory:</span> {{ (((host.TotalMemory-host.FreeMemory)/host.TotalMemory)*100).toFixed(2) }}&#37;<br />
-                    <span class="text-muted">OS:</span> {{ host.OSVersion }}<br />
-                    <span class="text-muted">BIOS ID:</span> {{ host.Guid }}
+                    <span class="text-muted">OS:</span> {{ host.OSVersion }}
                 </td>
-                <td>{{ host.Location?(host.Location):"Not set" }}</td>
+                <td>{{ host.ServicesCount }}</td>
                 <td>{{ host.FreeMemory | bytes }}</td>
                 <td>{{ host.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
                 <td>

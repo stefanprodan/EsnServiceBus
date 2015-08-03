@@ -5,7 +5,7 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-6 col-md-6">
+        <div class="col-lg-4 col-md-4">
             <div class="panel panel-success">
                 <div class="panel-heading">
                     <div class="row">
@@ -27,8 +27,8 @@
                 </a>
             </div>
         </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="panel panel-success">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -49,46 +49,22 @@
                 </a>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-6 col-md-6">
-            <div class="panel panel-info">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-danger">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
-                            <i class="fa fa-exchange fa-5x"></i>
+                            <i class="fa fa-bolt fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div style="font-size:40px">AMQP</div>
-                            <div>RabbitMQ Cluster</div>
+                            <div style="font-size:40px">{{ info.IssuesCount }}</div>
+                            <div>Issues</div>
                         </div>
                     </div>
                 </div>
-                <a href="{{ info.AmqpAdmin }}" target="_blank">
+                <a href="#/issues">
                     <div class="panel-footer">
-                        <span class="pull-left">Open dashboard</span>
-                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                        <div class="clearfix"></div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-3">
-                            <i class="fa fa-database fa-5x"></i>
-                        </div>
-                        <div class="col-xs-9 text-right">
-                            <div style="font-size:40px">NoSQL</div>
-                            <div>RethinkDB Cluster</div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ info.RethinkAdmin }}" target="_blank">
-                    <div class="panel-footer">
-                        <span class="pull-left">Open dashboard</span>
+                        <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                         <div class="clearfix"></div>
                     </div>
@@ -111,24 +87,28 @@
                 <td>{{ info.Registry.Name }}</td>
             </tr>
             <tr>
+                <td>Up since</td>
+                <td><span am-time-ago="info.Registry.StartDate"></span></td>
+            </tr>
+            <tr>
                 <td>Version</td>
                 <td>{{ info.Registry.Version }}</td>
             </tr>
             <tr>
                 <td>Build date</td>
-                <td>{{ info.Registry.BuildDate | date: "dd/MM/yy H:mm:ss"}}</td>
-            </tr>
-            <tr>
-                <td>Start date</td>
-                <td>{{ info.Registry.StartDate | date: "dd/MM/yy H:mm:ss"}}</td>
+                <td>{{ info.Registry.BuildDate | date: "dd/MM/yy H:mm:ss" }}</td>
             </tr>
             <tr>
                 <td>Pid</td>
                 <td>{{ info.Registry.Pid }}</td>
             </tr>
             <tr>
-                <td>Local path</td>
+                <td>Install path</td>
                 <td>{{ info.Registry.LocalPath }}</td>
+            </tr>
+            <tr>
+                <td>CPU time</td>
+                <td>{{ info.Registry.CpuTime | timespan: 3 }}</td>
             </tr>
             <tr>
                 <td>Memory usage</td>
@@ -157,6 +137,10 @@
             <tr>
                 <td>Host BIOS ID</td>
                 <td>{{ info.Registry.Host.Guid }}</td>
+            </tr>
+            <tr>
+                <td>Back-end web admin</td>
+                <td><a href="{{ info.AmqpAdmin }}" target="_blank">RabbitMQ</a> <a href="{{ info.RethinkAdmin }}" target="_blank">RethinkDB</a></td>
             </tr>
         </tbody>
     </table>

@@ -14,8 +14,8 @@ using System.Web.Http;
 namespace EsnServiceRegistry.Controllers
 {
     [NoCache]
-    [RoutePrefix("service")]
-    public class ServiceController : ApiController
+    [RoutePrefix("services")]
+    public class ServicesController : ApiController
     {
         [Route]
         [HttpGet]
@@ -41,12 +41,36 @@ namespace EsnServiceRegistry.Controllers
             return registryRepo.GetServiceInstances(guid);
         }
 
+        [Route("cluster/{guid}")]
+        [HttpGet]
+        public List<ServiceInfo> GetCluster(string guid)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.GetServiceCluster(guid);
+        }
+
         [Route("host/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetHostServices(string guid)
         {
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
             return registryRepo.AllHostServices(guid);
+        }
+
+        [Route("issues")]
+        [HttpGet]
+        public List<ServiceInfo> GetServiceIssues()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.AllDisconnectServices();
+        }
+
+        [Route("decommission/{guid}")]
+        [HttpGet]
+        public void DecommissionService(string guid)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            registryRepo.UpdateServiceStatus(guid, ServiceState.Decommissioned);
         }
 
     }

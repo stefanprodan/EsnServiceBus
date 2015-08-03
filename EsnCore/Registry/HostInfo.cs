@@ -22,5 +22,6 @@ namespace EsnCore.Registry
         public DateTime LastPingDate { get; set; }
         public bool IsDisconnect { get; set; }
         public List<ServiceInfo> Services { get; set; } = new List<ServiceInfo>();
+        public int ServicesCount { get; set; }
     }
 }

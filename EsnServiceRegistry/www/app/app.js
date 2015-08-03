@@ -47,6 +47,10 @@ esnApp.config(['$routeProvider',
             templateUrl: 'partials/dashboard.html',
             controller: 'DashboardCtrl'
         }).
+        when('/issues', {
+            templateUrl: 'partials/issues.html',
+            controller: 'IssuesCtrl'
+        }).
         when('/services', {
             templateUrl: 'partials/services.html',
             controller: 'ServicesCtrl'
@@ -94,13 +98,48 @@ esnApp.controller('DashboardCtrl', function ($scope, $http, $interval) {
 
 });
 
+esnApp.controller('IssuesCtrl', function ($scope, $http, $interval) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+    var promise;
+    var errorMsg = 'The server cannot be reached at the moment, retying...';
+
+    var url = 'services/issues';
+    $scope.getData = function () {
+        $http.get(url).then(function (services) {
+            $scope.services = services.data;
+            $scope.error = null;
+        }, function (err) {
+            $scope.error = errorMsg;
+        });
+    }
+
+    $scope.decommissionService = function (serviceGuid) {
+        var urlDec = 'services/decommission/' + serviceGuid;
+        $http.get(urlDec).then(function () {
+            $scope.getData();
+        }, function (err) {
+            $scope.error = errorMsg;
+        });
+    }
+
+    $scope.getData();
+    promise = $interval(function () { $scope.getData(); }, 5000);
+
+    $scope.$on('$destroy', function () {
+        $interval.cancel(promise);
+    });
+});
+
 esnApp.controller('ServicesCtrl', function ($scope, $http, $interval) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
     var promise;
-    var url = 'service';
+    var url = 'services';
 
     $scope.getData = function () {
         $http.get(url).then(function (services) {
@@ -126,8 +165,9 @@ esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interva
     $scope.params = {};
     var guid = $routeParams.serviceId;
     var promise;
-    var url = 'service/' + guid;
-    var urlIns = 'service/instances/' + guid;
+    var url = 'services/' + guid;
+    var urlIns = 'services/instances/' + guid;
+    var urlCluster = 'services/cluster/' + guid;
 
     $scope.getData = function () {
         $http.get(url).then(function (service) {
@@ -139,6 +179,12 @@ esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interva
 
         $http.get(urlIns).then(function (instances) {
             $scope.instances = instances.data;
+        }, function (err) {
+
+        });
+
+        $http.get(urlCluster).then(function (cluster) {
+            $scope.cluster = cluster.data;
         }, function (err) {
 
         });
@@ -159,7 +205,7 @@ esnApp.controller('HostsCtrl', function ($scope, $http, $interval) {
     };
     $scope.params = {};
     var promise;
-    var url = 'host';
+    var url = 'hosts';
 
     $scope.getData = function () {
         $http.get(url).then(function (hosts) {
@@ -186,8 +232,8 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $interval) 
     $scope.params = {};
     var guid = $routeParams.hostId;
     var promise;
-    var url = 'host/' + guid;
-    var urlSrvs = 'service/host/' + guid;
+    var url = 'hosts/' + guid;
+    var urlSrvs = 'services/host/' + guid;
 
     $scope.getData = function () {
         $http.get(url).then(function (host) {

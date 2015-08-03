@@ -14,8 +14,8 @@ using System.Web.Http;
 namespace EsnServiceRegistry.Controllers
 {
     [NoCache]
-    [RoutePrefix("host")]
-    public class HostController : ApiController
+    [RoutePrefix("hosts")]
+    public class HostsController : ApiController
     {
         [Route]
         [HttpGet]

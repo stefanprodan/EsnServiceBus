@@ -31,10 +31,11 @@ namespace EsnServiceRegistry.Controllers
             };
             dash.AmqpAdmin = ServiceConfig.Reader.AmqpAdmin;
             dash.RethinkAdmin = ServiceConfig.Reader.RethinkAdmin;
-            int services, hosts;
-            registryRepo.GetTotals(out services, out hosts);
+            int services, hosts, issues;
+            registryRepo.GetTotals(out services, out hosts, out issues);
             dash.ServicesCount = services;
             dash.HostsCount = hosts;
+            dash.IssuesCount = issues;
             return dash;
         }
 

@@ -16,5 +16,6 @@ namespace EsnCore.Registry
         ContinuePending = 5,
         StopPending = 6,
         Stopped = 7,
+        Decommissioned = 8
     }
 }
