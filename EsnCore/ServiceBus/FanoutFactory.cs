@@ -221,6 +221,7 @@ namespace EsnCore.ServiceBus
                     var props = amqpChannel.CreateBasicProperties();
                     props.Headers = new Dictionary<string, object>();
                     props.Headers.Add("x-version", version);
+                    props.Headers.Add("x-timestamp", DateTime.UtcNow.ToBinary().ToString());
                     props.ContentType = serializer.ContentType;
                     props.ContentEncoding = serializer.ContentEncoding;
 
