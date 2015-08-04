@@ -33,7 +33,7 @@
                             <i class="fa fa-hourglass-half fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
-                            <div style="font-size:40px">{{ service.CpuTime | timespan: 3 }}</div>
+                            <div style="font-size:40px">{{ service.CpuTime | timespan }}</div>
                             <div>CPU time</div>
                         </div>
                     </div>
@@ -93,6 +93,14 @@
             <tr>
                 <td>Last active date</td>
                 <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+            <tr>
+                <td>CPU time</td>
+                <td>{{ service.CpuTime | timespan: 3 }}</td>
+            </tr>
+            <tr>
+                <td>Memory usage</td>
+                <td>{{ service.MemoryUsage }} MB</td>
             </tr>
             <tr>
                 <td>Port</td>

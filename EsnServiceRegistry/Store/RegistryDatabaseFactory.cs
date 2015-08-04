@@ -1,5 +1,6 @@
 ﻿using RethinkDb;
 using RethinkDb.Configuration;
+using RethinkDb.ConnectionFactories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace EsnServiceRegistry.Store
 
         public RegistryConnection Create()
         {
-            return r ?? (r = new RegistryConnection(connectionFactory.Get()));
+            return r ?? (r = new RegistryConnection(new ReliableConnectionFactory(connectionFactory).Get()));
         }
 
         public void ApplySchema()

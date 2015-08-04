@@ -128,7 +128,7 @@ namespace EsnCore.ServiceBus
 
                             try
                             {
-                                logger.Debug($"Topic {topic} consumer message received from {queueName} with topics {delivery.RoutingKey}");
+                                //logger.Debug($"Topic {topic} consumer message received from {queueName} with topics {delivery.RoutingKey}");
 
                                 //check version
                                 if (delivery.BasicProperties.Headers != null && delivery.BasicProperties.Headers.Keys.Contains("x-version"))
