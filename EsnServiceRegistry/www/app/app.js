@@ -72,7 +72,7 @@ esnApp.config(['$routeProvider',
         });
   }]);
 
-esnApp.controller('DashboardCtrl', function ($scope, $http, $interval) {
+esnApp.controller('DashboardCtrl', function ($scope, $http, $timeout) {
     $scope.filter = {
         $: ''
     };

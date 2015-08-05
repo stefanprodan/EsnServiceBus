@@ -5,6 +5,7 @@ using EsnServiceRegistry.Models;
 using System;
 using EsnServiceRegistry.Store;
 using EsnServiceRegistry.Consumers;
+using System.Linq;
 
 namespace EsnServiceRegistry
 {
@@ -12,25 +13,45 @@ namespace EsnServiceRegistry
     {
         private static ServiceInfo serviceDefinition;
         private static RpcServer<ServiceInfo> serviceRegistryServer;
+        private static TopicFactory statsConsumer;
+        private static IDisposable webServer;
 
         static void Main(string[] args)
         {
             serviceDefinition = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            if (args.Length == 0 || args.Contains("-ampq"))
+            {
+                serviceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, RegisterService);
+                serviceRegistryServer.StartInBackground();
+                statsConsumer = StartStatsConsumer();
 
-            serviceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, registryRepo.InsertOrUpdateService);
-            serviceRegistryServer.StartInBackground();
-            var statsConsumer = StartStatsConsumer();
+                Console.WriteLine("Registry AMPQ started");
+            }
 
-            var webServer = WebApp.Start<Startup>(url: ServiceConfig.Reader.GetBaseAddress());
-
-            Console.WriteLine("Service Registry Server started");
+            if (args.Length == 0 || args.Contains("-web"))
+            {
+                webServer = WebApp.Start<Startup>(url: ServiceConfig.Reader.GetBaseAddress());
+                Console.WriteLine("Web server started");
+            }
             Console.ReadLine();
 
-            statsConsumer.StopConsumer();
-            serviceRegistryServer.Stop();
-            webServer.Dispose();
+            if (statsConsumer != null)
+            {
+                statsConsumer.StopConsumer();
+                serviceRegistryServer.Stop();
+            }
+
+            if (webServer != null)
+            {
+                webServer.Dispose();
+            }
+        }
+
+        static ServiceInfo RegisterService(ServiceInfo info)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.InsertOrUpdateService(info);
         }
 
         static TopicFactory StartStatsConsumer()
@@ -47,5 +68,6 @@ namespace EsnServiceRegistry
 
             return consumer;
         }
+
     }
 }
