@@ -225,23 +225,48 @@ esnApp.controller('HostsCtrl', function ($scope, $http, $interval) {
 
 });
 
-esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $interval) {
+esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $timeout, $modal) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
+    $scope.tags = '';
     var guid = $routeParams.hostId;
-    var promise;
+    var timeoutPromise;
     var url = 'hosts/' + guid;
     var urlSrvs = 'services/host/' + guid;
 
-    $scope.getData = function () {
+    var editModal = $modal({ scope: $scope, templateUrl: 'partials/hostedit.html', show: false });
+
+    $scope.openEdit = function (hostGuid) {
+        $timeout.cancel(timeoutPromise);
+        editModal.$promise.then(editModal.show);
+    }
+
+    $scope.closeEdit = function (hostGuid) {
+        getData();
+        editModal.$promise.then(editModal.hide);
+    }
+
+    $scope.doEdit = function (hostGuid) {
+        //getData();
+        editModal.$promise.then(editModal.hide);
+    }
+
+    var getData = function () {
         $http.get(url).then(function (host) {
             $scope.host = host.data;
             $scope.error = host.data ? null : 'Host not found.';
+
+            if (host.data) {
+                $scope.host.TagList = host.data.Tags.join(', ');
+            }
+
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
-        });
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
+        });;
 
 
         $http.get(urlSrvs).then(function (services) {
@@ -249,13 +274,15 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $interval) 
         }, function (err) {
 
         });
+
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
 });
 
