@@ -6,6 +6,9 @@
                 <h4 class="modal-title" ng-bind="host.Name"></h4>
             </div>
             <div class="modal-body">
+                <div class="alert alert-danger" ng-if="doEditError">
+                    {{ doEditError }}
+                </div>
                 <form name="editHost">
                     <div class="form-group">
                         <label for="new-location">Location</label>

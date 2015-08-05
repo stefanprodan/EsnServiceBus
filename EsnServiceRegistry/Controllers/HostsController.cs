@@ -32,5 +32,19 @@ namespace EsnServiceRegistry.Controllers
             var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
             return registryRepo.GetHost(guid);
         }
+
+        [Route("{guid}/edit")]
+        [HttpPost]
+        public void Edit(string guid, HostEditModel model)
+        {
+            var tagList = new List<string>();
+            if(!string.IsNullOrEmpty(model.Tags))
+            {
+                tagList = model.Tags.Split(',').Select(t => t.Trim()).ToList();
+            }
+
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            registryRepo.UpdateHostTagsLocation(guid, model.Location, tagList);
+        }
     }
 }

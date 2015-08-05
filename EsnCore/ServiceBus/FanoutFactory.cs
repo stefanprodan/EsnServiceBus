@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -27,13 +28,14 @@ namespace EsnCore.ServiceBus
         private volatile bool stopPending;
         private readonly string version;
 
+        public int TimeoutInSeconds { get; set; } = 30;
         public string ExchangeName { get; set; }
         public bool DurableExchange { get; set; }
 
         /// <summary>
         ///  This setting determines the maximum number of times the consumer will automatically try to reconnect
         /// </summary>
-        public int RetryMax { get; set; }
+        public int MaxRetry { get; set; }
 
         public FanoutFactory(ConnectionFactory connectionFactory, IMessageSerializer serializer, ILog logger, string version, string exchangeName = "esn.fanout", bool durableExchange = true)
         {
@@ -96,8 +98,19 @@ namespace EsnCore.ServiceBus
                             exitArgs.Queue = queueName;
                             exitArgs.RoutingKey = "";
 
+                            BasicDeliverEventArgs delivery;
                             // blocks till the a message is received
-                            var delivery = consumer.Queue.Dequeue();
+                            var ok = consumer.Queue.Dequeue(TimeoutInSeconds * 1000, out delivery);
+                            if (!ok)
+                            {
+                                if (MaxRetry > 0 && retryCount > MaxRetry)
+                                {
+                                    logger.Error($"The maximum of {MaxRetry} retries has been reached, timeout error.");
+                                    break;
+                                }
+                                retryCount++;
+                                return;
+                            }
 
                             exitArgs.Message = delivery.Body;
                             exitArgs.Headers = delivery.BasicProperties.Headers;
@@ -149,9 +162,9 @@ namespace EsnCore.ServiceBus
                                 break;
                             }
 
-                            if (RetryMax > 0 && retryCount > RetryMax)
+                            if (MaxRetry > 0 && retryCount > MaxRetry)
                             {
-                                logger.LogException(eox, $"Exiting! The maximum of {RetryMax} retries has been reached, error {eox.Message}");
+                                logger.LogException(eox, $"Exiting! The maximum of {MaxRetry} retries has been reached, error {eox.Message}");
                                 break;
                             }
 

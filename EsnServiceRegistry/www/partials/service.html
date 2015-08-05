@@ -114,9 +114,29 @@
                 <td>Path</td>
                 <td>{{ service.LocalPath }}</td>
             </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-striped" ng-if="service">
+        <caption>Host details</caption>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
             <tr>
                 <td>Host name</td>
                 <td><a href="#/hosts/{{ service.HostGuid }}">{{ service.Host.Name }}</a></td>
+            </tr>
+            <tr>
+                <td>Host location</td>
+                <td>{{ service.Host.Location?(service.Host.Location):"Not set" }}</td>
+            </tr>
+            <tr>
+                <td>Host tags</td>
+                <td><span ng-repeat="tag in service.Host.Tags">{{tag}}{{$last ? '' : ', '}}</span></td>
             </tr>
             <tr>
                 <td>Host OS</td>

@@ -77,104 +77,116 @@ esnApp.controller('DashboardCtrl', function ($scope, $http, $interval) {
         $: ''
     };
     $scope.params = {};
-    var promise;
+    var timeoutPromise;
     var url = 'registry/dashboard';
 
-    $scope.getData = function () {
+    var getData = function () {
         $http.get(url).then(function (dashboard) {
             $scope.info = dashboard.data;
             $scope.error = null;
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
         });
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
-
 });
 
-esnApp.controller('IssuesCtrl', function ($scope, $http, $interval) {
+esnApp.controller('IssuesCtrl', function ($scope, $http, $timeout) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-    var promise;
+    var timeoutPromise;
     var errorMsg = 'The server cannot be reached at the moment, retying...';
 
-    var url = 'services/issues';
-    $scope.getData = function () {
-        $http.get(url).then(function (services) {
-            $scope.services = services.data;
-            $scope.error = null;
-        }, function (err) {
-            $scope.error = errorMsg;
-        });
-    }
+    var urlIssues = 'services/issues';
+    var urlDecommission = 'services/decommission/';
 
     $scope.decommissionService = function (serviceGuid) {
-        var urlDec = 'services/decommission/' + serviceGuid;
-        $http.get(urlDec).then(function () {
+        var url = urlDecommission + serviceGuid;
+        $http.get(url).then(function () {
             $scope.getData();
         }, function (err) {
             $scope.error = errorMsg;
         });
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    var getData = function () {
+        $http.get(urlIssues).then(function (services) {
+            $scope.services = services.data;
+            $scope.error = null;
+        }, function (err) {
+            $scope.error = errorMsg;
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
+        });
+    }
+
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
 });
 
-esnApp.controller('ServicesCtrl', function ($scope, $http, $interval) {
+esnApp.controller('ServicesCtrl', function ($scope, $http, $timeout) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-    var promise;
+    var timeoutPromise;
     var url = 'services';
 
-    $scope.getData = function () {
+    var getData = function () {
         $http.get(url).then(function (services) {
             $scope.services = services.data;
             $scope.error = null;
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
         });
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
 });
 
-esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interval) {
+esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $timeout) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
     var guid = $routeParams.serviceId;
-    var promise;
+    var timeoutPromise;
     var url = 'services/' + guid;
     var urlIns = 'services/instances/' + guid;
     var urlCluster = 'services/cluster/' + guid;
 
-    $scope.getData = function () {
+    var getData = function () {
         $http.get(url).then(function (service) {
             $scope.service = service.data;
             $scope.error = service.data ? null : 'Service not found.';
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
         });
 
         $http.get(urlIns).then(function (instances) {
@@ -190,37 +202,41 @@ esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $interva
         });
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
 
 });
 
-esnApp.controller('HostsCtrl', function ($scope, $http, $interval) {
+esnApp.controller('HostsCtrl', function ($scope, $http, $timeout) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
-    var promise;
+    var timeoutPromise;
     var url = 'hosts';
 
-    $scope.getData = function () {
+    var getData = function () {
         $http.get(url).then(function (hosts) {
             $scope.hosts = hosts.data;
             $scope.error = null;
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
         });
     }
 
-    $scope.getData();
-    promise = $interval(function () { $scope.getData(); }, 5000);
+    getData();
 
     $scope.$on('$destroy', function () {
-        $interval.cancel(promise);
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
     });
 
 });
@@ -232,9 +248,12 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $timeout, $
     $scope.params = {};
     $scope.tags = '';
     var guid = $routeParams.hostId;
+
+    var urlHost = 'hosts/' + guid;
+    var urlHostEdit = urlHost + '/edit';
+    var urlServices = 'services/host/' + guid;
+
     var timeoutPromise;
-    var url = 'hosts/' + guid;
-    var urlSrvs = 'services/host/' + guid;
 
     var editModal = $modal({ scope: $scope, templateUrl: 'partials/hostedit.html', show: false });
 
@@ -248,13 +267,21 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $timeout, $
         editModal.$promise.then(editModal.hide);
     }
 
-    $scope.doEdit = function (hostGuid) {
-        //getData();
-        editModal.$promise.then(editModal.hide);
+    $scope.doEdit = function () {
+
+        $http.post(urlHostEdit, { Location: $scope.host.Location, Tags: $scope.host.TagList }, { headers: { 'Content-Type': 'application/json' } })
+        .then(function (response) {
+            $scope.doEditError = null;
+            getData();
+            editModal.$promise.then(editModal.hide);
+        }, function (err) {
+            console.log(err);
+            $scope.doEditError = 'The server cannot be reached at the moment, please try again.';
+        });
     }
 
     var getData = function () {
-        $http.get(url).then(function (host) {
+        $http.get(urlHost).then(function (host) {
             $scope.host = host.data;
             $scope.error = host.data ? null : 'Host not found.';
 
@@ -266,10 +293,10 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $timeout, $
             $scope.error = 'The server cannot be reached at the moment, retying...';
         }).finally(function () {
             timeoutPromise = $timeout(getData, 5000);
-        });;
+        });
 
 
-        $http.get(urlSrvs).then(function (services) {
+        $http.get(urlServices).then(function (services) {
             $scope.services = services.data;
         }, function (err) {
 

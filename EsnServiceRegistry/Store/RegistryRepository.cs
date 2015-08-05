@@ -378,14 +378,9 @@ namespace EsnServiceRegistry.Store
             return model.ToHostInfo();
         }
 
-        public HostInfo UpdateHostTagsLocation(string guid, List<string> tags, string location)
+        public void UpdateHostTagsLocation(string guid, string location, List<string> tags)
         {
-            var host = r.Run(r.Hosts.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
-            host.Tags = tags;
-            host.Location = location;
-            r.Run(r.Hosts.Update(h => host));
-
-            return host.ToHostInfo();
+            r.Run(r.Hosts.GetAll(guid, "idx_guid").Update(h => new HostModel { Location = location, Tags = tags }));
         }
 
         public HostInfo UpdateHostLocation(string guid, string location)

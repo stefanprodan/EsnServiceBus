@@ -115,6 +115,7 @@
     <Compile Include="Controllers\HostsController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Models\DashboardModel.cs" />
+    <Compile Include="Models\HostEditModel.cs" />
     <Compile Include="Models\ServiceConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -223,6 +224,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="www\content\js\si-table.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="www\index.html">

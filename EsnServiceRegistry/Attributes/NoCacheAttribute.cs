@@ -12,12 +12,14 @@ namespace EsnServiceRegistry.Attributes
     {
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            actionExecutedContext.Response.Headers.CacheControl = new CacheControlHeaderValue()
+            if (actionExecutedContext.Response != null)
             {
-                Public = false,
-                NoCache = true
-            };
-
+                actionExecutedContext.Response.Headers.CacheControl = new CacheControlHeaderValue()
+                {
+                    Public = false,
+                    NoCache = true
+                };
+            }
             base.OnActionExecuted(actionExecutedContext);
         }
     }
