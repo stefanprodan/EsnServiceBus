@@ -168,21 +168,52 @@ esnApp.controller('ServicesCtrl', function ($scope, $http, $timeout) {
     });
 });
 
-esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $timeout) {
+esnApp.controller('ServiceCtrl', function ($scope, $http, $routeParams, $timeout, $modal) {
     $scope.filter = {
         $: ''
     };
     $scope.params = {};
+
     var guid = $routeParams.serviceId;
     var timeoutPromise;
     var url = 'services/' + guid;
+    var urlEdit = 'services/' + guid + '/edit';
     var urlIns = 'services/instances/' + guid;
     var urlCluster = 'services/cluster/' + guid;
+
+    var editModal = $modal({ scope: $scope, templateUrl: 'partials/service.edit.html', show: false });
+
+    $scope.openEdit = function () {
+        $timeout.cancel(timeoutPromise);
+        editModal.$promise.then(editModal.show);
+    }
+
+    $scope.closeEdit = function () {
+        getData();
+        editModal.$promise.then(editModal.hide);
+    }
+
+    $scope.doEdit = function () {
+
+        $http.post(urlEdit, { Tags: $scope.service.TagList }, { headers: { 'Content-Type': 'application/json' } })
+        .then(function (response) {
+            $scope.doEditError = null;
+            getData();
+            editModal.$promise.then(editModal.hide);
+        }, function (err) {
+            console.log(err);
+            $scope.doEditError = 'The server cannot be reached at the moment, please try again.';
+        });
+    }
 
     var getData = function () {
         $http.get(url).then(function (service) {
             $scope.service = service.data;
             $scope.error = service.data ? null : 'Service not found.';
+
+            if (service.data) {
+                $scope.service.TagList = service.data.Tags.join(', ');
+            }
         }, function (err) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
         }).finally(function () {
@@ -255,14 +286,14 @@ esnApp.controller('HostCtrl', function ($scope, $http, $routeParams, $timeout, $
 
     var timeoutPromise;
 
-    var editModal = $modal({ scope: $scope, templateUrl: 'partials/hostedit.html', show: false });
+    var editModal = $modal({ scope: $scope, templateUrl: 'partials/host.edit.html', show: false });
 
-    $scope.openEdit = function (hostGuid) {
+    $scope.openEdit = function () {
         $timeout.cancel(timeoutPromise);
         editModal.$promise.then(editModal.show);
     }
 
-    $scope.closeEdit = function (hostGuid) {
+    $scope.closeEdit = function () {
         getData();
         editModal.$promise.then(editModal.hide);
     }

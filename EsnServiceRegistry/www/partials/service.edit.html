@@ -1,0 +1,26 @@
+﻿<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="service.Name">
+                <button type="button" class="close" aria-label="Close" ng-click="closeEdit()"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" ng-bind="service.Name"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger" ng-if="doEditError">
+                    {{ doEditError }}
+                </div>
+                <form name="editForm">
+                    <div class="form-group">
+                        <label for="new-tags">Tags</label>
+                        <input class="form-control" id="new-tags" type="text" name="tags" ng-model="service.TagList" />
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" ng-disabled="((editForm.$invalid || editForm.$pristine))" ng-click="doEdit();">Save</button>
+                <button type="button" class="btn btn-default" ng-click="closeEdit();">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -76,7 +76,7 @@
             </tr>
             <tr>
                 <td>Tags</td>
-                <td><span ng-repeat="tag in service.Tags">{{tag}}{{$last ? '' : ', '}}</span></td>
+                <td><span ng-repeat="tag in service.Tags">{{tag}}{{$last ? '' : ', '}}</span> <a href ng-click="openEdit();">edit</a></td>
             </tr>
             <tr>
                 <td>Version</td>

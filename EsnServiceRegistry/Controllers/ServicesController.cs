@@ -33,6 +33,20 @@ namespace EsnServiceRegistry.Controllers
             return registryRepo.GetService(guid);
         }
 
+        [Route("{guid}/edit")]
+        [HttpPost]
+        public void Edit(string guid, ServiceEditModel model)
+        {
+            var tagList = new List<string>();
+            if (!string.IsNullOrEmpty(model.Tags))
+            {
+                tagList = model.Tags.Split(',').Select(t => t.Trim()).ToList();
+            }
+
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            registryRepo.UpdateServiceTags(guid, tagList);
+        }
+
         [Route("instances/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetInstances(string guid)

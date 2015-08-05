@@ -115,6 +115,7 @@
     <Compile Include="Controllers\HostsController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Models\DashboardModel.cs" />
+    <Compile Include="Models\ServiceEditModel.cs" />
     <Compile Include="Models\HostEditModel.cs" />
     <Compile Include="Models\ServiceConfig.cs" />
     <Compile Include="Program.cs" />
@@ -232,7 +233,10 @@
     <Content Include="www\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www\partials\hostedit.html">
+    <Content Include="www\partials\service.edit.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www\partials\host.edit.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="www\partials\host.html">

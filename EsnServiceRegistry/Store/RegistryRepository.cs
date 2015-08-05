@@ -113,10 +113,10 @@ namespace EsnServiceRegistry.Store
             return list;
         }
 
-        public List<ServiceInfo> AllActiveServices(int activeMinutesAgo)
+        public List<ServiceInfo> AllActiveServices()
         {
             var list = new List<ServiceInfo>();
-            var date = DateTime.UtcNow.AddMinutes((-1) * activeMinutesAgo);
+            var date = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
             var running = (int)ServiceState.Running;
 
             var services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").OrderByDescending("idx_date").Where(s => s.State == running)).ToList();
@@ -262,14 +262,9 @@ namespace EsnServiceRegistry.Store
             return model.ToServiceInfo();
         }
 
-        public ServiceInfo UpdateServiceTags(string guid, List<string> tags)
+        public void UpdateServiceTags(string guid, List<string> tags)
         {
-            var service = r.Run(r.Services.GetAll(guid, "idx_guid").OrderByDescending(s => s.LastPingDate).Limit(1)).FirstOrDefault();
-            service.Tags = tags;
-
-            r.Run(r.Services.Update(h => service));
-
-            return service.ToServiceInfo();
+            r.Run(r.Services.GetAll(guid, "idx_guid").Update(h => new ServiceModel { Tags = tags }));
         }
 
         public void UpdateServiceStatus(string guid, ServiceState state)
@@ -381,15 +376,6 @@ namespace EsnServiceRegistry.Store
         public void UpdateHostTagsLocation(string guid, string location, List<string> tags)
         {
             r.Run(r.Hosts.GetAll(guid, "idx_guid").Update(h => new HostModel { Location = location, Tags = tags }));
-        }
-
-        public HostInfo UpdateHostLocation(string guid, string location)
-        {
-            var host = r.Run(r.Hosts.GetAll(guid, "idx_guid").Limit(1)).FirstOrDefault();
-            host.Location = location;
-            r.Run(r.Hosts.Update(h => host));
-
-            return host.ToHostInfo();
         }
 
         #endregion
