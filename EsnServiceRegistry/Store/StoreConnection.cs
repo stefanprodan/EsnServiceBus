@@ -40,5 +40,28 @@ namespace EsnServiceRegistry.Store
         {
             return _connection.Run(queryObject, queryConverter, cancellationToken);
         }
+
+        Task<T> RunAsync<T>(IQueryConverter queryConverter, IScalarQuery<T> queryObject, 
+            CancellationToken cancellationToken)
+        {
+            return _connection.RunAsync(queryConverter, queryObject, cancellationToken);
+        }
+
+        IAsyncEnumerator<T> RunAsync<T>(IQueryConverter queryConverter, ISequenceQuery<T> queryObject)
+        {
+            return _connection.RunAsync(queryConverter, queryObject);
+        }
+
+        public Task<T> RunAsync<T>(IScalarQuery<T> queryObject, IQueryConverter queryConverter = null, 
+            CancellationToken? cancellationToken = null)
+        {
+            return _connection.RunAsync(queryObject, queryConverter, cancellationToken);
+        }
+
+        public IAsyncEnumerator<T> RunAsync<T>(ISequenceQuery<T> queryObject,
+            IQueryConverter queryConverter = null)
+        {
+            return _connection.RunAsync(queryObject, queryConverter);
+        }
     }
 }

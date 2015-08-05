@@ -13,17 +13,24 @@ namespace EsnServiceRegistry.Consumers
     {
         public void ProcessMessage(ServiceInfo service)
         {
+            var task = ProcessMessageAsync(service);
             try
             {
-                var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-                registryRepo.InsertOrUpdateService(service);
+                task.Wait(TimeSpan.FromSeconds(30));
             }
-            catch (Exception ex)
+            catch (Exception exe)
             {
-                var exe = new ConsumerException("Database error", ex);
-                exe.IsRetryable = true;
-                throw exe;
+                var ex = new ConsumerException("Database operation has timeout", exe);
+                ex.IsRetryable = true;
+                throw ex;
             }
+
+        }
+
+        private async Task ProcessMessageAsync(ServiceInfo service)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            await registryRepo.InsertOrUpdateServiceAsync(service);
         }
 
         public void OnConsumerExit(ConsumerExitEventArgs args)

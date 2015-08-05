@@ -158,9 +158,67 @@ namespace EsnServiceRegistry.Store
 
             var model = ServiceModel.FromServiceInfo(info);
             var host = InsertOrUpdateHost(info.Host);
-
+            
             var service = r.Run(r.Services.OrderByDescending("idx_date").Where(x => x.Guid == info.Guid).Limit(1)).FirstOrDefault();
 
+            if (service == null)
+            {
+                model.RegisterDate = DateTime.UtcNow;
+
+                var response = r.Run(r.Services.Insert(model));
+                model.Id = response.GeneratedKeys.FirstOrDefault();
+            }
+            else
+            {
+                // merge tags for db with received ones
+                foreach (var tag in service.Tags)
+                {
+                    if (!model.Tags.Contains(tag))
+                    {
+                        model.Tags.Add(tag);
+                    }
+                }
+
+                // insert new if pid changed
+                if (info.Pid != service.Pid)
+                {
+                    model.Id = null;
+                    model.RegisterDate = DateTime.UtcNow;
+
+                    var response = r.Run(r.Services.Insert(model));
+                    model.Id = response.GeneratedKeys.FirstOrDefault();
+
+                    //update last instance status
+                    service.State = (int)ServiceState.Stopped;
+                    r.Run(r.Services.Update(h => service));
+                }
+                else
+                {
+                    model.Id = service.Id;
+                    model.RegisterDate = service.RegisterDate;
+
+                    r.Run(r.Services.Update(h => model));
+                }
+            }
+
+            return model.ToServiceInfo();
+        }
+
+        public async Task<ServiceInfo> InsertOrUpdateServiceAsync(ServiceInfo info)
+        {
+            if (string.IsNullOrEmpty(info.Guid))
+            {
+                info.Guid = Guid.NewGuid().ToString();
+            }
+
+            info.LastPingDate = DateTime.UtcNow;
+
+            var model = ServiceModel.FromServiceInfo(info);
+            var host = InsertOrUpdateHost(info.Host);
+
+            var th = r.RunAsync(r.Services.OrderByDescending("idx_date").Where(x => x.Guid == info.Guid).Limit(1));
+            await th.MoveNext();
+            var service = th.Current;
             if (service == null)
             {
                 model.RegisterDate = DateTime.UtcNow;
