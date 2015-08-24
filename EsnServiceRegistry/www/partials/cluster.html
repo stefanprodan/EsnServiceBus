@@ -1,0 +1,95 @@
+﻿<div>
+    <div class="alert alert-danger" ng-if="error">
+        <i class="fa fa-spinner fa-pulse"></i> {{ error }}
+    </div>
+
+    <div class="row" ng-if="service">
+        <div class="col-md-6">
+            <h3>Cluster {{ service.Name }}</h3>
+        </div>
+    </div>
+    <hr />
+    <div class="row" ng-if="service">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-sitemap fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ cluster.length }}</div>
+                            <div>Cluster size</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-hourglass-half fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ service.TotalCpuTime | timespan }}</div>
+                            <div>CPU time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-list fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div style="font-size:40px">{{ service.TotalMemory }} MB</div>
+                            <div>Memory usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <table class="table" ng-if="cluster" si-table>
+        <caption>Instances</caption>
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th sort-by="CpuTime">CPU Time</th>
+                <th sort-by="MemoryUsage">Memory (MB)</th>
+                <th sort-by="LastPingDate" sort-init="desc">Last active</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in cluster" ng-class="{'warning' : service.IsDisconnect}">
+                <td>
+                    <strong><a href="#/services/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
+                    <strong>{{ service.IsDisconnect ? "Offline" : "Online" }}</strong><br />
+                    <span class="text-muted">Host:</span> <a href="#/hosts/{{ service.HostGuid }}">{{ service.HostName }}</a><br />
+                    <span class="text-muted">Started:</span> {{ service.StartDate | date: "dd/MM/yy H:mm:ss" }}
+                </td>
+                <td>{{ service.CpuTime | timespan: 3 }}</td>
+                <td>{{ service.MemoryUsage }}</td>
+                <td>{{ service.LastPingDate | date: "dd/MM/yy H:mm:ss"}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="alert alert-info" ng-if="!service && !error">
+        <i class="fa fa-spinner fa-pulse"></i> Loading ...
+    </div>
+</div>

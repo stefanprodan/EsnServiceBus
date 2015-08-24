@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RethinkDb;
+using EsnServiceRegistry.Models;
 
 namespace EsnServiceRegistry.Store
 {
@@ -22,7 +23,7 @@ namespace EsnServiceRegistry.Store
             services = 0;
             hosts = 0;
 
-            var date = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
+            var date = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout);
             var running = (int)ServiceState.Running;
             services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").Where(s => s.State == running)).Count();
             hosts = r.Run(r.Hosts.Between(date, DateTime.UtcNow, "idx_date")).Count();
@@ -97,6 +98,76 @@ namespace EsnServiceRegistry.Store
             return list;
         }
 
+        public ServiceCluster GetServiceClusterInfo(string guid)
+        {
+            var stopped = (int)ServiceState.Stopped;
+            var removed = (int)ServiceState.Decommissioned;
+            var name = r.Run(r.Services.GetAll(guid, "idx_guid").Limit(1)).First().Name;
+            var services = r.Run(r.Services
+                .OrderByDescending("idx_date")
+                .Filter(s => s.State != stopped && s.State != removed && s.Name == name)
+                .Group(s => s.Name)
+                .Map(s => new ServiceCluster
+                {
+                    TotalCount = 1,
+                    OnlineCount = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : 1,
+                    Name = s.Name,
+                    TotalMemory = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : s.MemoryUsage,
+                    TotalCpuTime = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : s.CpuTime,
+                })
+                .Reduce((left, right) => new ServiceCluster
+                {
+                    TotalCount = left.TotalCount + right.TotalCount,
+                    OnlineCount = left.OnlineCount + right.OnlineCount,
+                    Name = left.Name,
+                    TotalMemory = left.TotalMemory + right.TotalMemory,
+                    TotalCpuTime = left.TotalCpuTime + right.TotalCpuTime,
+                }));
+
+            return services.Values.FirstOrDefault();
+        }
+
+        public List<ServiceCluster> GetServiceClusters()
+        {
+            var list = new List<ServiceCluster>();
+            var stopped = (int)ServiceState.Stopped;
+            var removed = (int)ServiceState.Decommissioned;
+            var services = r.Run(r.Services
+                .OrderByDescending("idx_date")
+                .Filter(s => s.State != stopped && s.State != removed)
+                .Group(s => s.Name)
+                .Map(s => new ServiceCluster
+                {
+                    TotalCount = 1,
+                    OnlineCount = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : 1,
+                    Guid = s.Guid,
+                    Name = s.Name,
+                    TotalMemory = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : s.MemoryUsage,
+                    TotalCpuTime = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout) > s.LastPingDate ? 0 : s.CpuTime,
+                    From = s.LastPingDate,
+                    To = s.LastPingDate,
+                    //HostList = new[] { s.HostGuid }
+                    //Hosts = new Dictionary<string, object> { { s.HostGuid, s.HostName } }
+                })
+                .Reduce((left, right) => new ServiceCluster
+                {
+                    TotalCount = left.TotalCount + right.TotalCount,
+                    OnlineCount = left.OnlineCount + right.OnlineCount,
+                    Guid = left.Guid,
+                    Name = left.Name,
+                    TotalMemory = left.TotalMemory + right.TotalMemory,
+                    TotalCpuTime = left.TotalCpuTime + right.TotalCpuTime,
+                    From = left.From < right.From ? left.From : right.From,
+                    To = left.To > right.To ? left.To : right.To,
+                    //HostList = left.HostList.Union(right.HostList).ToArray()
+                    //Hosts = left.Hosts.Union(right.Hosts).ToDictionary(h => h.Key, h => h.Value)
+                }));
+
+            list = services.Values.ToList();
+
+            return list;
+        }
+
         public List<ServiceInfo> AllServices(ServiceState status)
         {
             var list = new List<ServiceInfo>();
@@ -116,7 +187,7 @@ namespace EsnServiceRegistry.Store
         public List<ServiceInfo> AllActiveServices()
         {
             var list = new List<ServiceInfo>();
-            var date = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
+            var date = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout);
             var running = (int)ServiceState.Running;
 
             var services = r.Run(r.Services.Between(date, DateTime.UtcNow, "idx_date").OrderByDescending("idx_date").Where(s => s.State == running)).ToList();
@@ -133,7 +204,7 @@ namespace EsnServiceRegistry.Store
         public List<ServiceInfo> AllDisconnectServices()
         {
             var list = new List<ServiceInfo>();
-            var date = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
+            var date = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout);
             var running = (int)ServiceState.Running;
 
             var services = r.Run(r.Services.Between(DateTime.UtcNow.AddDays(-30), date, "idx_date").OrderByDescending("idx_date").Where(s => s.State == running)).ToList();

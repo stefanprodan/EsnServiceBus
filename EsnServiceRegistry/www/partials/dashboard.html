@@ -73,6 +73,37 @@
         </div>
     </div>
 
+    <table class="table" ng-if="services" si-table>
+        <caption>Clusters</caption>
+        <thead>
+            <tr>
+                <th sort-by="Name" sort-init="asc">Service</th>
+                <th sort-by="TotalCount">Size</th>
+                <th sort-by="TotalMemory">Memory (MB)</th>
+                <th sort-by="To">Last active</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr si-sortable="single" ng-repeat="service in services | filter:filter" ng-class="{'warning' : service.OnlineCount < 2}">
+                <td>
+                    <strong><a href="#/clusters/{{ service.Guid }}">{{ service.Name }}</a></strong><br />
+                    <span class="text-muted">On-line instances:</span> {{ service.OnlineCount }}<br />
+                    <span class="text-muted">CPU time:</span> {{ service.TotalCpuTime | timespan: 3 }}<br />
+                </td>
+                <td>{{ service.TotalCount }} instances<br />{{ service.OnlineCount }} active</td>
+                <td>{{ service.TotalMemory }}</td>
+                <td>{{ service.To | date: "dd/MM/yy H:mm:ss" }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <si-table-pagination limit="5" />
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
     <table class="table table-striped" ng-if="info">
         <caption>Service Registry Server details</caption>
         <thead>

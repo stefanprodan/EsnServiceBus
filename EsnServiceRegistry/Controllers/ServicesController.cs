@@ -55,6 +55,14 @@ namespace EsnServiceRegistry.Controllers
             return registryRepo.GetServiceInstances(guid);
         }
 
+        [Route("cluster/{guid}/stats")]
+        [HttpGet]
+        public ServiceCluster GetClusterStats(string guid)
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.GetServiceClusterInfo(guid);
+        }
+
         [Route("cluster/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetCluster(string guid)

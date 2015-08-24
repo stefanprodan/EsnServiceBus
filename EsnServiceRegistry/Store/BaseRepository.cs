@@ -9,7 +9,7 @@ namespace EsnServiceRegistry.Store
     public abstract class BaseRepository
     {
         public int Limit = 1000;
-        public int DisconnectTimeout { get; set; } = 2;
+        public int DisconnectTimeout { get; set; } = 35;
 
         internal protected RegistryConnection r;
 
@@ -22,7 +22,7 @@ namespace EsnServiceRegistry.Store
 
         internal bool IsDisconnect(DateTime lastPing)
         {
-            var offset = DateTime.UtcNow.AddMinutes((-1) * DisconnectTimeout);
+            var offset = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout);
             return offset > lastPing;
         }
     }

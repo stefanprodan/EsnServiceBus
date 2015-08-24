@@ -51,6 +51,10 @@ esnApp.config(['$routeProvider',
             templateUrl: 'partials/issues.html',
             controller: 'IssuesCtrl'
         }).
+        when('/clusters/:serviceId', {
+            templateUrl: 'partials/cluster.html',
+            controller: 'ClusterCtrl'
+        }).
         when('/services', {
             templateUrl: 'partials/services.html',
             controller: 'ServicesCtrl'
@@ -79,6 +83,7 @@ esnApp.controller('DashboardCtrl', function ($scope, $http, $timeout) {
     $scope.params = {};
     var timeoutPromise;
     var url = 'registry/dashboard';
+    var urlCluster = 'registry/dashboard/clusters';
 
     var getData = function () {
         $http.get(url).then(function (dashboard) {
@@ -88,6 +93,12 @@ esnApp.controller('DashboardCtrl', function ($scope, $http, $timeout) {
             $scope.error = 'The server cannot be reached at the moment, retying...';
         }).finally(function () {
             timeoutPromise = $timeout(getData, 5000);
+        });
+
+        $http.get(urlCluster).then(function (services) {
+            $scope.services = services.data;
+        }, function (err) {
+
         });
     }
 
@@ -138,6 +149,45 @@ esnApp.controller('IssuesCtrl', function ($scope, $http, $timeout) {
             $timeout.cancel(timeoutPromise);
         }
     });
+});
+
+esnApp.controller('ClusterCtrl', function ($scope, $http, $routeParams, $timeout) {
+    $scope.filter = {
+        $: ''
+    };
+    $scope.params = {};
+
+    var guid = $routeParams.serviceId;
+    var timeoutPromise;
+    var url = 'services/cluster/' + guid + '/stats';
+    var urlCluster = 'services/cluster/' + guid;
+
+    var getData = function () {
+        $http.get(url).then(function (service) {
+            $scope.service = service.data;
+            $scope.error = service.data ? null : 'Service not found.';
+
+        }, function (err) {
+            $scope.error = 'The server cannot be reached at the moment, retying...';
+        }).finally(function () {
+            timeoutPromise = $timeout(getData, 5000);
+        });
+
+        $http.get(urlCluster).then(function (cluster) {
+            $scope.cluster = cluster.data;
+        }, function (err) {
+
+        });
+    }
+
+    getData();
+
+    $scope.$on('$destroy', function () {
+        if (timeoutPromise) {
+            $timeout.cancel(timeoutPromise);
+        }
+    });
+
 });
 
 esnApp.controller('ServicesCtrl', function ($scope, $http, $timeout) {

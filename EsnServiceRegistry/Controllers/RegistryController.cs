@@ -39,6 +39,14 @@ namespace EsnServiceRegistry.Controllers
             return dash;
         }
 
+        [Route("dashboard/clusters")]
+        [HttpGet]
+        public List<ServiceCluster> GetServiceClusters()
+        {
+            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
+            return registryRepo.GetServiceClusters();
+        }
+
         [Route("ping")]
         [HttpGet]
         public HttpResponseMessage Ping()

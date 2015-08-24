@@ -16,4 +16,19 @@ namespace EsnServiceRegistry.Models
         public int IssuesCount { get; set; }
         public ServiceInfo Registry { get; set; }
     }
+
+    public class ServiceCluster
+    {
+        public int TotalCount { get; set; }
+        public int OnlineCount { get; set; }
+        public string Guid { get; set; }
+        public string Name { get; set; }
+        public long TotalMemory { get; set; }
+        public double TotalCpuTime { get; set; }
+        public DateTime From { get; set; }
+        public DateTime To { get; set; }
+
+        public Dictionary<string, object> Hosts { get; set; }
+        public string[] HostList { get; set; }
+    }
 }
