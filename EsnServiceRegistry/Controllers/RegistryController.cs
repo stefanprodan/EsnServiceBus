@@ -21,30 +21,35 @@ namespace EsnServiceRegistry.Controllers
         [HttpGet]
         public DashboardModel GetDashboard()
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            var dash = new DashboardModel
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
             {
-                Registry = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo {
-                    Port = Convert.ToInt32(ServiceConfig.Reader.Port),
-                    Name = ServiceConfig.Reader.ServiceName,
-                })
-            };
-            dash.AmqpAdmin = ServiceConfig.Reader.AmqpAdmin;
-            dash.RethinkAdmin = ServiceConfig.Reader.RethinkAdmin;
-            int services, hosts, issues;
-            registryRepo.GetTotals(out services, out hosts, out issues);
-            dash.ServicesCount = services;
-            dash.HostsCount = hosts;
-            dash.IssuesCount = issues;
-            return dash;
+                var dash = new DashboardModel
+                {
+                    Registry = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo
+                    {
+                        Port = Convert.ToInt32(ServiceConfig.Reader.Port),
+                        Name = ServiceConfig.Reader.ServiceName,
+                    })
+                };
+                dash.AmqpAdmin = ServiceConfig.Reader.AmqpAdmin;
+                dash.RethinkAdmin = ServiceConfig.Reader.RethinkAdmin;
+                int services, hosts, issues;
+                registryRepo.GetTotals(out services, out hosts, out issues);
+                dash.ServicesCount = services;
+                dash.HostsCount = hosts;
+                dash.IssuesCount = issues;
+                return dash;
+            }
         }
 
         [Route("dashboard/clusters")]
         [HttpGet]
         public List<ServiceCluster> GetServiceClusters()
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetServiceClusters();
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetServiceClusters();
+            }
         }
 
         [Route("ping")]

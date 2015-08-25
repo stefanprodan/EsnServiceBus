@@ -21,16 +21,20 @@ namespace EsnServiceRegistry.Controllers
         [HttpGet]
         public List<HostInfo> GetAll()
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllHosts();
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.AllHosts();
+            }
         }
 
         [Route("{guid}")]
         [HttpGet]
         public HostInfo Get(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetHost(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetHost(guid);
+            }
         }
 
         [Route("{guid}/edit")]
@@ -43,8 +47,10 @@ namespace EsnServiceRegistry.Controllers
                 tagList = model.Tags.Split(',').Select(t => t.Trim()).ToList();
             }
 
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            registryRepo.UpdateHostTagsLocation(guid, model.Location, tagList);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                registryRepo.UpdateHostTagsLocation(guid, model.Location, tagList);
+            }
         }
     }
 }

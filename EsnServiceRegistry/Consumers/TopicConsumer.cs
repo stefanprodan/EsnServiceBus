@@ -29,8 +29,10 @@ namespace EsnServiceRegistry.Consumers
 
         private async Task ProcessMessageAsync(ServiceInfo service)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            await registryRepo.InsertOrUpdateServiceAsync(service);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                await registryRepo.InsertOrUpdateServiceAsync(service);
+            }
         }
 
         public void OnConsumerExit(ConsumerExitEventArgs args)

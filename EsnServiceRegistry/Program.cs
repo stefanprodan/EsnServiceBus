@@ -20,6 +20,11 @@ namespace EsnServiceRegistry
         {
             serviceDefinition = ServiceInfoFactory.CreateServiceDefinition(new ServiceInfo { Port = Convert.ToInt32(ServiceConfig.Reader.Port) });
 
+            var store = new RegistryDatabaseFactory();
+            store.Create();
+            store.ApplySchema();
+            store.r.Connection.Dispose();
+
             if (args.Length == 0 || args.Contains("-ampq"))
             {
                 serviceRegistryServer = new RpcServer<ServiceInfo>(ConnectionConfig.GetFactoryDefault(), RegistrySettings.RegistryQueue, RegisterService);
@@ -50,8 +55,14 @@ namespace EsnServiceRegistry
 
         static ServiceInfo RegisterService(ServiceInfo info)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.InsertOrUpdateService(info);
+            ServiceInfo result = null;
+
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                result = registryRepo.InsertOrUpdateService(info);
+            }
+
+            return result;
         }
 
         static TopicFactory StartStatsConsumer()

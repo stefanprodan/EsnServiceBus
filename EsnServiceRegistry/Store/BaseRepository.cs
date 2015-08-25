@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EsnServiceRegistry.Store
 {
-    public abstract class BaseRepository
+    public abstract class BaseRepository: IDisposable
     {
         public int Limit = 1000;
         public int DisconnectTimeout { get; set; } = 35;
@@ -16,14 +16,20 @@ namespace EsnServiceRegistry.Store
         public BaseRepository(RegistryDatabaseFactory databaseFactory)
         {
             r = databaseFactory.Create();
-
-            databaseFactory.ApplySchema();
         }
 
         internal bool IsDisconnect(DateTime lastPing)
         {
             var offset = DateTime.UtcNow.AddSeconds((-1) * DisconnectTimeout);
             return offset > lastPing;
+        }
+
+        public void Dispose()
+        {
+            if(r != null && r.Connection != null)
+            {
+                r.Connection.Dispose();
+            }
         }
     }
 }

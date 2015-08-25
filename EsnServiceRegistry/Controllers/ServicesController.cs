@@ -21,16 +21,20 @@ namespace EsnServiceRegistry.Controllers
         [HttpGet]
         public List<ServiceInfo> GetAll()
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllServices(ServiceState.Running);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.AllServices(ServiceState.Running);
+            }
         }
 
         [Route("{guid}")]
         [HttpGet]
         public ServiceInfo Get(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetService(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetService(guid);
+            }
         }
 
         [Route("{guid}/edit")]
@@ -43,56 +47,70 @@ namespace EsnServiceRegistry.Controllers
                 tagList = model.Tags.Split(',').Select(t => t.Trim()).ToList();
             }
 
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            registryRepo.UpdateServiceTags(guid, tagList);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                registryRepo.UpdateServiceTags(guid, tagList);
+            }
         }
 
         [Route("instances/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetInstances(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetServiceInstances(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetServiceInstances(guid);
+            }
         }
 
         [Route("cluster/{guid}/stats")]
         [HttpGet]
         public ServiceCluster GetClusterStats(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetServiceClusterInfo(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetServiceClusterInfo(guid);
+            }
         }
 
         [Route("cluster/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetCluster(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.GetServiceCluster(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.GetServiceCluster(guid);
+            }
         }
 
         [Route("host/{guid}")]
         [HttpGet]
         public List<ServiceInfo> GetHostServices(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllHostServices(guid);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.AllHostServices(guid);
+            }
         }
 
         [Route("issues")]
         [HttpGet]
         public List<ServiceInfo> GetServiceIssues()
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            return registryRepo.AllDisconnectServices();
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                return registryRepo.AllDisconnectServices();
+            }
         }
 
         [Route("decommission/{guid}")]
         [HttpGet]
         public void DecommissionService(string guid)
         {
-            var registryRepo = new RegistryRepository(new RegistryDatabaseFactory());
-            registryRepo.UpdateServiceStatus(guid, ServiceState.Decommissioned);
+            using (var registryRepo = new RegistryRepository(new RegistryDatabaseFactory()))
+            {
+                registryRepo.UpdateServiceStatus(guid, ServiceState.Decommissioned);
+            }
         }
 
     }

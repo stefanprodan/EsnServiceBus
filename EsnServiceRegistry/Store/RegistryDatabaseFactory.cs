@@ -13,7 +13,7 @@ namespace EsnServiceRegistry.Store
     {
         private static IConnectionFactory connectionFactory = RethinkDb.Newtonsoft
                                .Configuration.ConfigurationAssembler.CreateConnectionFactory("registry");
-        private RegistryConnection r;
+        internal RegistryConnection r;
 
         public RegistryConnection Create()
         {
